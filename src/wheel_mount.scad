@@ -1,5 +1,8 @@
 include <nutsnbolts/cyl_head_bolt.scad>;
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
+include <gt2_20_pulley.scad>
+include <608_bearing.scad>
+
 // Mounting bracket for wheels
 
 module beveled_cylinder(h, r) {
@@ -37,10 +40,10 @@ module ScooterWheel(radius)
     $fn = 32;
     translate([0, 0, 2.4-0.7]) cylinder(0.7, 1.1, 1.1);
     cylinder(0.7, 1.1, 1.1);
-    translate([0, 0, -.51]) cylinder(1.5, .5, .5); // Builtin spacer
+    //translate([0, 0, -.51]) cylinder(1.5, .5, .5); // Builtin spacer
     }
     $fn = 32;
-    cylinder(2.4, .4, .4);
+    cylinder(2.4, .3, .3);
     }
 }
 
@@ -106,8 +109,8 @@ module MountBrackets()
     mirror([0, 0, 1]) translate([1, -2.8-.5-panel_thickness, 0]) TSlotCornerBracket();
     //mirror([0, 0, 1]) translate([-1, -2.8, 0]) TSlotCornerBracket();
 }
-
-panel_to_wheel_center = 8;
+// at 6.5, then it is not flat
+panel_to_wheel_center = 7.15;
 module SupportPlane(depth)
 {
 
@@ -132,7 +135,7 @@ module SupportPlane(depth)
         linear_extrude(depth) Trapezoid(1, 6, panel_to_wheel_center);
         mirror([1, 0, 0]) linear_extrude(depth) Trapezoid(1, 6, panel_to_wheel_center);
         }
-        translate([-12, -0.6, 0.0]) cube([24, 1-0.4, 0.6]); // Flat intersection
+        translate([-12, -0.6, 0.0]) cube([24, 1-0.4, depth]); // Flat intersection
         }
         // linear_extrude(.1) translate([-3, -2.8, 0]) square([2, 2.8]);
         
@@ -160,28 +163,53 @@ module SupportPlane(depth)
         
         union()
         {
-            linear_extrude(depth) scale(.5) translate([-4.5, 7, 0]) rotate([0, 0, -110]) Trapezoid(2, 3, 2);
-            mirror([1, 0, 0]) linear_extrude(depth) scale(.5) translate([-4.5, 7, 0]) rotate([0, 0, -110]) Trapezoid(2, 3, 2);
+            translate([0, 3, 0]) 
+            {
+                hull()
+                {
+                    translate([2, 0, 0]) cylinder(5, 0.25, 0.25); // M5
+                    translate([-2, 0, 0]) cylinder(5, 0.25, 0.25);
+                }
+            }
             $fn = 32;
-            // 8mm
-            translate([0, panel_to_wheel_center-1, 0]) cylinder(4, .4, .4);
+            // 6mm
+            // TODO: Replace with 608 bearing
+            translate([0, panel_to_wheel_center-1, 0.0]) 626BearingCutout();
+            translate([0, panel_to_wheel_center-1, 0]) cylinder(4, .3, .3);
         }
     }
 }
 
 module MountedWheel(depth=0.5)
 {
+    mirror([0, 0, 1]) color([1.0, 0.0, 1.0, 1.0]) translate([0, -2.5, 0.7]) GT2_20_IdlePulley();
+    
+    mirror([0, 0, 1]) color([1.0, 0.0, 1.0, 1.0]) translate([0, 0, 0]) GT2_20_Pulley();
+    
+    rotate([-90, 0, 0]) 626Bearing();
+    
     spacer_depth = 0.51;
     translate([0, 0, spacer_depth+depth])
     {
-    translate([0, 0, depth+2.4-depth]) scale(0.1) screw("M8x45");
-    translate([0, 0, -.7-depth]) scale(0.1) nut("M8");  
+    // ROD HERE
+    $fn=36;
+    // 6mm D shaft
+    color([1.0, 0, 0, 1]) translate([0, 0, -2.5]) 
+    difference()
+    {
+        cylinder(4.0, 0.3, 0.3);
+        translate([0.55, 0, 0]) cube([0.6, 0.6, 10.0], true);
+    }
+    //scale(0.1) screw("M6x45");
+    
+    // TODO: This uses the Pololu conversion kit now...
+    //translate([0, 0, -.7-depth]) scale(0.1) nut("M8");  
     // Small wheel
     // translate([0, 0, .51+.1]) ScooterWheel(3.6);
     // Large wheel
     // 608 bearing builtin spacer
-    translate([0, 0, -spacer_depth+depth]) ScooterWheel(5.0);
-    translate([0, -panel_to_wheel_center+1, -depth-spacer_depth]) SupportPlane(depth);
+    ScooterWheel(5.0);
+    color([1, 1, 1]) translate([0, -panel_to_wheel_center+1, -depth-spacer_depth]) SupportPlane(depth);
     }
 }
 
@@ -197,10 +225,10 @@ module MountedOmniBall(depth=0.5)
     translate([0, 0, -spacer_depth+depth]) OmniBall(6.5);
     translate([7, -panel_to_wheel_center+1, -depth-spacer_depth]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth);
     
-    translate([-7, -panel_to_wheel_center+1, -depth-spacer_depth]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth);
+    translate([-7, -panel_to_wheel_center+3, -depth-spacer_depth]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth);
 }
 
-//mounted_wheel_depth = 0.5 + .002;
+//mounted_wheel_depth = 0.8;
 //MountedWheel(mounted_wheel_depth);
 // MountedOmniBall
 

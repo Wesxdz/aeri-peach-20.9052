@@ -1,6 +1,6 @@
 //color([1.0, 0.0, 0.0, 0.4]) import("elp/ELP_Mount_Top.stl");
 
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <nutsnbolts/cyl_head_bolt.scad>
 
 $fn=64;

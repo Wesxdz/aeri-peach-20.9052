@@ -1,4 +1,4 @@
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <connector_pentagon_plate.scad>
 include <peach_core.scad>
 
@@ -127,18 +127,46 @@ union()
 
 // non-vent zone around peach core
 CorePanelMask((1/image_height)*1.5);
-
 }
+
 union()
 {
 rotate([0, 0, 180+config_rot]) translate([0, 0, -panel_thickness])linear_extrude(10) scale(default_scale+(1/image_height)) import("core_outline.svg", $fn = 10, center=true);
 rotate([-90, 0, config_rot]) PeachPanelMountHoles();
+
+// Port cutout for Jetson plugin
+port_width = 20;
+port_height = 0.5;
+
+union()
+{
+hull()
+{
+    rotate([0, 0, 180+config_rot]) translate([0, 6, 0]) 
+    {
+        translate([-port_width/2, 0, 0]) cylinder(1, port_height, port_height);
+        translate([-port_width/2+2, 1.6, 0]) cylinder(1, port_height, port_height);
+        translate([port_width/2, 0, 0]) cylinder(1, port_height, port_height);
+        translate([port_width/2-2, 1.6, 0]) cylinder(1, port_height, port_height);
+    }
+}
+
+}
+
 }
 }
+
 }
+
 }
 
 //
 //scale(10) color([1, 0, 0]) FleshBleed();
-//scale(10) PeachCorePanel(true);
+rotate([0, 0, 18]) PeachCorePanel(true);
+translate([4, 8, 0]) rotate([90, 90, 0]) Battery();
 //color([0.9, 0.6, 0.6, 0.8]) CoreVolume();
+
+module Battery()
+{
+    cube([13.2, 4.3, 2.5]);
+};

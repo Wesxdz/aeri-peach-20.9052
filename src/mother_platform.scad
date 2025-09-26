@@ -1,7 +1,7 @@
 // Dodecahedron
 
 include <nutsnbolts/cyl_head_bolt.scad>
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 
 include <core_platform.scad>
 include <atx_compliance.scad>

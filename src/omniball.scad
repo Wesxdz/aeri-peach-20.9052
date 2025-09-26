@@ -6,7 +6,10 @@ include <BOSL2/screws.scad>
 include <BOSL2/threading.scad>
 // Use milimeters
 
-$fn=64;
+//$fn=32;
+// $fn=64;
+// Production hemisphere
+$fn=256;
 
 // Radius of omniball
 wheel_radius = 60;
@@ -18,7 +21,7 @@ split_pos = wheel_radius/2+1;//5*3;
 // The radius of the barrel support cylinder
 wheel_cutout = 12.5;
 // 608 bearing radius
-bearing_cutout = 11;
+bearing_cutout = 11+0.1; // 1mm for 3d printing errors 
 // The distance from the perimeter of the barrel support cylinder hole
 // to the nearby pole of the omniball cutoff
 // ie the 'magnitude chopped off the poles'
@@ -49,7 +52,7 @@ barrel_wheel_slot_edge = -cuboid_offset - cuboid_fixed_cut/2;
 // The passive rod is 80mm
 //barrel_wheel_slot_edge = 40; // wheel_radius - (barrel_wheel_radius+wheel_to_center_padding);
 
-barrel_wheel_height = 15;
+barrel_wheel_height = 13;
 
 rod_pad = 10;
 
@@ -96,7 +99,8 @@ module SemisphereRing()
             cube([wheel_radius*2, wheel_radius*2, wheel_radius*2]);
             
             // Remove the region which overlaps the axis connectors
-            rotate([0, -90, 0]) cylinder(h=10, r=inner_radius+2);
+            // large 6mm spacing region just in case
+            rotate([0, -90, 0]) cylinder(h=10, r=inner_radius+6);
         }
     }
 }
@@ -162,7 +166,7 @@ module BarrelWheelSupportRod()
     }
 }
 
-module HemisphereConnector(show_barrel_region=true)
+module HemisphereConnector(show_hemisphere_connector_section=true, show_barrel_region=true)
 {   
     union()
     {
@@ -175,10 +179,13 @@ module HemisphereConnector(show_barrel_region=true)
         color([1.0, 0.5, 0.5, .4])
         union()
         {
+        if (show_hemisphere_connector_section)
+        {
         rotate([0, -90, 0]) cylinder(axis_connection_thickness , inner_radius , inner_radius);
         // Bearing spacer
         translate([-axis_connection_thickness -2, 0, 0])    
         rotate([0, 90, 0]) cylinder(2, 22/2, 22/2);
+        }
         }
         //  hole
         BarrelWheelSupportRodHalf();
@@ -208,7 +215,7 @@ module HemisphereConnector(show_barrel_region=true)
                 for (i = [0:1])
                 {   
                     translate(nut_pos[i])
-                    rotate(nut_rot[i]) rotate([0, 0, 30]) nut_trap_inline(6.5, "M8");
+                    rotate(nut_rot[i]) rotate([0, 0, 30]) scale(1.1) nut_trap_inline(6.5, "M8");
                 }
                 
                 BarrelWheelSupportRod();
@@ -228,7 +235,7 @@ module HemisphereConnector(show_barrel_region=true)
     }
 }
 
-module BarrelWheel(radius=3, height=3)
+module BarrelWheel(radius=barrel_wheel_radius, height=barrel_wheel_height)
 {
     difference()
     {
@@ -255,7 +262,7 @@ module BarrelWheelPlacement()
 {
     translate([barrel_wheel_offset, 0, 0]) 
     {
-        BarrelWheel(barrel_wheel_radius, barrel_wheel_height);
+        BarrelWheel();
     }
 }
 
@@ -270,7 +277,7 @@ module Semiball()
     }
     translate([barrel_wheel_offset, 0, 0]) 
     {
-        BarrelWheel(barrel_wheel_radius, barrel_wheel_height);
+        BarrelWheel();
         // https://www.aliexpress.us/item/2255800287548941.html
         // Use 'dowel pin'
         //translate([0, 0, -wheel_cutout]) cylinder(30, 1.5, 1.5);
@@ -356,8 +363,9 @@ module Omniball(show_rod=false, show_nuts=false, show_screws=false)
                 ActiveRods();
                 for (i = [2:4])
                 {
+                    
                     translate(nut_pos[i])
-                    rotate(nut_rot[i]) rotate([0, 0, 30]) nut_trap_inline(6.5, "M8");
+                    rotate(nut_rot[i]) rotate([0, 0, 30]) scale(1.1) nut_trap_inline(6.5, "M8");
                 }
                 
                 AxisConnectionScrews();
@@ -418,7 +426,7 @@ module AxisConnectionScrewNutCuts()
     {
         if (i != 2 && i != 6)
         {
-        translate([axis_connection_thickness, 0, 0]) rotate([90, i*360/axis_connector_screws, -90]) translate([0, inner_radius-10, 0]) nut_trap_inline(3, "M3");
+        translate([axis_connection_thickness, 0, 0]) rotate([90, i*360/axis_connector_screws, -90]) translate([0, inner_radius-10, 0]) scale(1.1) nut_trap_inline(3, "M3");
         }
     }
 }
@@ -449,8 +457,9 @@ Omniwrap();
 }
 }
 
-//AxisConnectionScrews();
-//CrossSection();
+CrossSection();
+
+
 
 module Hemispheres()
 {
@@ -458,25 +467,56 @@ HemisphereConnector();
 mirror([1, 0, 0]) HemisphereConnector();
 }
 
-//Omniwrap();
-
 module RodSystem()
 {
 BarrelWheelSupportRodThreaded();
 ActiveRodsThreaded();
 }
-//SemisphereRing();
-//SemiWrap();
 
-Omniball(true, true, true);
-// OmniballNuts();
-Omniwrap();
+// 3D print part renders
+// BarrelWheel(); // x2
 
-//RodSystem();
-//OmmniballNuts();
+// BarrelWheelSupport x2
+// translate([0, 0, -split_pos]) rotate([0, 90, 0]) HemisphereConnector(show_hemisphere_connector_section=false);
 
-//BarrelWheelPlacement();
-//color([0.9, 0.9, 0.9])
-//translate([barrel_wheel_offset, 0, -wheel_cutout]) cylinder(28, 1.5, 1.5);
-//mirror([1, 0, 0]) translate([barrel_wheel_offset, 0, -wheel_cutout]) cylinder(28, 1.5, 1.5);
+module ConnectorCutout()
+{
+    union()
+    {
+        AxisConnectionScrews();
+        AxisConnectionScrewHeadCuts();
+        AxisConnectionScrewNutCuts();
+        
+        ActiveRods();
+        for (i = [2:4])
+        {
+            
+            translate(nut_pos[i])
+            rotate(nut_rot[i]) rotate([0, 0, 30]) scale(1.1) nut_trap_inline(6.5, "M8");
+        }
+    }
+}
 
+module RightHemisphereConnector()
+{
+    rotate([0, 90, 0])
+    difference()
+    {
+        HemisphereConnector(show_barrel_region=false);
+        ConnectorCutout();
+    }
+}
+// RightHemisphereConnector();
+
+module LeftHemisphereConnector()
+{   
+    rotate([0, -90, 0])
+    difference()
+    {
+        mirror([1, 0, 0]) HemisphereConnector(show_barrel_region=false);
+        ConnectorCutout();
+    }
+}
+// LeftHemisphereConnector();
+
+//rotate([0, 90, 0]) SemiWrap();

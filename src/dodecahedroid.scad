@@ -1,5 +1,5 @@
-// Welcome Dodecahome 20.9052
-include <dodecahome_config.scad>
+// Giant Peach 20.9052
+include <dodecahedroid_config.scad>
 
 include <pentagon_plate.scad>
 include <connector_pentagon_plate.scad>
@@ -15,7 +15,7 @@ include <cargo_bay_hatch.scad>
 include <core_platform.scad>
 include <camera_panel.scad>
 // include <atx_compliance.scad>
-//include <vertex_composite.scad>
+include <vertex_composite.scad>
 //include <penta_composite.scad>
 
 //if (true)
@@ -36,18 +36,13 @@ include <camera_panel.scad>
 //}
 
 show_cradle_vent = true;
+rotate([0, 0, 180])
 difference()
 {
 rotate([-magic_angle, 0, 0])
 {
 for (i = [0 : len(pos)-1]) {
-    //if(face_groups[i] == 3) // face_groups[i] == 2
-    //if (meta_groups[i] == 1) // Mortality escape pod
-    //if (meta_groups[i] == 1 || face_groups[i] == 1) // Mothership
-    //if (face_groups[i] == 3)
-    //if (face_groups[i] == 2) //&& i == 6
-    //if (true)
-    if (i == 9)
+    if(face_groups[i] == 3)
     {
     translate(pos[i]*panel_edge_length) rotate(rots[i]) rotate([0, 0, panel_rots[i]])
     if (!render_fast_iter)
@@ -67,15 +62,15 @@ for (i = [0 : len(pos)-1]) {
         // TODO: Refactor sections to distinct files...
         else if (i == 4) 
         {
-            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 2);
+            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 2);
         }
         else if (i == 11) 
         {
-            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 3);
+            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 3);
         }
         else if (i == 9) 
         {
-            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 1);
+            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 1);
         }
        else if (i == 6)
         {

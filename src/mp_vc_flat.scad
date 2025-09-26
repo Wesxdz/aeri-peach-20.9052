@@ -1,5 +1,5 @@
 include <mother_platform.scad>
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <vertex_connector.scad>
 
 module PlatformVertexConnectors(connectors, con_color, upper_platform = 0)

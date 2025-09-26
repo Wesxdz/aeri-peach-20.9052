@@ -1,7 +1,7 @@
 include <pentagon_plate.scad>
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <connector_pentagon_plate.scad>
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <nutsnbolts/cyl_head_bolt.scad>
 
 $fn=64;

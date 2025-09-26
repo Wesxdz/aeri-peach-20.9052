@@ -1,4 +1,5 @@
 include <hemisphere_transfer_unit.scad>
+include <608_bearing.scad>
 
 module Hemisphere(radius, half_sep)
 {
@@ -9,13 +10,6 @@ module Hemisphere(radius, half_sep)
         sphere(radius);
         translate([-radius, -half_sep, -radius]) cube([radius*2, radius*2, radius*2]);
     }
-}
-
-module 608Bearing()
-{
-    $fn=36;
-    rotate([90, 0, 0])
-    cylinder(.7, 1.1, 1.1);
 }
 
 module SemiMount(thickness, width)

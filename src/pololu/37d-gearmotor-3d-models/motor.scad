@@ -1,0 +1,1 @@
+import("37d-gearmotor-19-30-encoder.stl", convexity=3);

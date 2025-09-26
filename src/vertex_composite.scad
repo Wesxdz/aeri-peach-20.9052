@@ -1,4 +1,4 @@
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <penta_connector.scad>
 
 include <dodecahedron_inner_volume.scad>
@@ -41,6 +41,7 @@ module PentaVolume()
 standard_panel_rots = [36, -36*4.5, 0, 18, 36, -18, 18, -18, 18, 36+18+36*6, 18, 0+36*4];
 
 union()
+rotate([0, 0, 180])
 rotate([-magic_angle, 0, 0])
 {
 for (i = [0 : len(pos)-1]) 

@@ -1,6 +1,6 @@
 // For evaluating cradle vertex connector power variant
 
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <wheel_panel.scad>
 
 include <BOSL2/std.scad>
@@ -38,17 +38,20 @@ $fn=128;
                 show_mounts = true;
                 if (i == 4)
                 {
-                    //WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 2);
+                    import ("wheel_panel_2.stl");
+                    // WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 2);
                 }
                 
                 if (i == 11) 
                 {
-                    //WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 3);
+                    import ("wheel_panel_3.stl");
+                    // WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 3);
                 }
                 
                 if (i == 9) 
                 {
-                    WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 1);
+                    import ("wheel_panel_1.stl");
+                    // WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 1);
                     translate([0, 0, -7]) scale(0.1) import("omniball.stl");
                 }
                 }

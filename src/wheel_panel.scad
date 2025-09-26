@@ -1,7 +1,8 @@
 
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <wheel_mount.scad>
 include <connector_pentagon_plate.scad>
+include <bracket_anchor.scad>
 
 module CradleRest()
 {   
@@ -11,10 +12,9 @@ module CradleRest()
 
 module WheelMountPrefab(rotation, radius, cell_size, wall_thickness, thickness, border_edge, vent=true, render_color)
 {
-mounted_wheel_depth = 0.5 + .002;
+mounted_wheel_depth = 0.8 + .002;
 translate([0, 0, 0])
 {
-    color([0, 1, 0])
     translate([-wmb_pio, 0, -panel_to_wheel_center+0.5+panel_thickness*1.65]) rotate([-90, 0, -90]) 
     //MountedOmniBall();
     MountedWheel(mounted_wheel_depth);
@@ -23,7 +23,7 @@ translate([0, 0, 0])
 
 module WheelMountSlots(wheel_config)
 {
-    mounted_wheel_depth = 0.5 + .002;
+    mounted_wheel_depth = 0.8 + .002;
     front_wheel_shift = 0;
     // There are four wheel slot configurations
 
@@ -92,58 +92,10 @@ module WheelMountSlots(wheel_config)
         }
         }
         }
-    }
-
-    for (i= [0 : 0])
-    {
-        if (wheel_config == 2 || wheel_config == 3)
-        {
-        // To avoid fragments and ensure support
-        // Shift the wheel mount slots forward slightly to prevent cutout overlap with static stability mode
-        rotate_wheel_z = wheel_config == 2 ? -standard_side_wheel_tilt : standard_side_wheel_tilt;
-        rotate([0, 0, rotate_wheel_z])
-        {
-        translate([-wmb_pio-(i*(2.8+mounted_wheel_depth)), -12/2, 0]) 
-        translate([0, -shift_forward_dist, 0])
-        {
-        cube([mounted_wheel_depth, 5, 1]);
-        }
-        
-        mirror([0, 1, 0])
-        translate([0, shift_forward_dist, 0])
-        translate([-wmb_pio-(i*(2.8+mounted_wheel_depth)), -12/2, 0]) 
-        {
-        cube([mounted_wheel_depth, 5, 1]);
-        }
-        }
-        }
-    }
-
-    for (i= [0 : 1])
-    {
-        if (wheel_config == 4)
-        {
-        rotate_wheel_z = -90 + i * 180;
-        translate([front_wheel_shift, 0, 0]) // Shift down along vector parallel to panel so the front wheel has
-        // equal contact z with side standard wheel (which is dependent on scooter wheel profile)
-        rotate([0, 0, rotate_wheel_z])
-        {
-        translate([-wmb_pio/2, -12/2, 0]) 
-        {
-        cube([mounted_wheel_depth, 5, 1]);
-        }
-        
-        mirror([0, 1, 0])
-        translate([-wmb_pio/2, -12/2, 0]) 
-        {
-        cube([mounted_wheel_depth, 5, 1]);
-        }
-        }
-        }
-    }
+    } 
 }
 
-module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, border_edge, vent = true, render_color, show_mount = true, show_rest = false, wheel_config = 0) {
+module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, border_edge, vent = true, render_color, show_mount = true, show_rest = false, wheel_config = 0, render_panel = true) {
 
     // Wheel config
     // 0. static stable only
@@ -155,7 +107,7 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
         // TODO: Evaluate what this size should be, where it should be
         // if there should be additional support mechanisms (esp if not metal)
         // prior to 2nd print run
-        mounted_wheel_depth = 0.5 + 0.002;
+        mounted_wheel_depth = 0.8 + 0.002;
 
         shift_forward_dist = (wheel_config == 2 ? 1 : -1) * 0.5;
         front_wheel_shift = 0.0; // -1.6; // -1.9
@@ -170,10 +122,11 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
         standard_side_wheel_tilt = 24.635;
 
         stationary_rot = rotation;
+        rotate_wheel_z = 0;
 
         translate([0, 0, 0]) {
             if (show_mount) {
-                color([0, 1, 0]) {
+                 {
                     // In triwheel mode, the front wheel faces directly forward
 
                         if (wheel_config == 1)
@@ -187,19 +140,26 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                             rotate([-90, 0, 0])
                             SupportPlane(mounted_wheel_depth);
                             
-                            translate([0, 0, -7]) scale(0.1) import("omniball.stl");
+                            //translate([0, 0, -7]) scale(0.1) import("omniball.stl");
                         } else
                         {
                             if (robot_mode) {
                             rotate_wheel_z = wheel_config == 2 ? -standard_side_wheel_tilt : (wheel_config == 3 ? standard_side_wheel_tilt : (wheel_config == 1 ? -90 : 0));
                             translate([wheel_config == 1 ? front_wheel_shift - 0.5 : 0, 0, 0])
                             rotate([0, 0, rotate_wheel_z])
+                            {
+                            
                             translate([0, -shift_forward_dist, 0])
                             // The exact displacement of the front wheel mount to be even with the side wheels
                             // depends on the profile of the scooter wheels for exact calculation
                             translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio), 0, -panel_to_wheel_center + 0.5 + panel_thickness * 1.65])
                             rotate([-90, 0, -90])
+                            union()
+                            {
                             MountedWheel(mounted_wheel_depth);
+                            }
+                            rotate([0, 0, 180]) translate([wmb_pio-0.8, wheel_config == 3 ? -0.5: 0.5, panel_thickness]) MotorAttachment();
+                            }
                         } else {
                             translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio), 0, -panel_to_wheel_center + 0.5 + panel_thickness * 1.65])
                             rotate([-90, 0, -90])
@@ -213,7 +173,7 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                 // For back wheels, rotate Z standard_side_wheel_tilt
                 // translate([10, 0, 0]) rotate([180, 0, 36])
                 
-                if (false) // TODO: Render only the wheel/mount in pos
+                if (render_panel)
                 {
                 rotate([0, 0, stationary_rot])
                 difference() {
@@ -226,8 +186,23 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                 translate([wheel_config == 1 ? front_wheel_shift + 0.5 : 0, 0, 0])
                 rotate([0, 0, rotate_wheel_z])
                 translate([0, -shift_forward_dist, 0])
+                
+                union()
+                {
+                // Belt passthrough circle
+                translate([-wmb_pio - 1.15, 0, 0])
+                {
+                    hull()
+                    {
+                    translate([0, 2, 0]) cylinder(4, 0.4, 0.4, $fn=64);
+                    translate([0, -2, 0]) cylinder(4, 0.4, 0.4, $fn=64);
+                    }
+                }
+                rotate([0, 0, 180]) translate([wmb_pio-0.8, 0.0, panel_thickness]) GearmotorBracketScrewHoles();
                 WheelMountSlots(wheel_config);
                 }
+                }
+                
                 }
             }
 
@@ -316,8 +291,8 @@ module RestPrefab(rotation, radius, cell_size, wall_thickness, thickness, border
 }
 
 
+
 //rotate([0, -tetra_a, 0])
 //{
-//translate([-wmb_pio+0.5, 0, 0]) CradleRest();
-//WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 1);
+//WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), true, show_rest=false, 2);
 //}

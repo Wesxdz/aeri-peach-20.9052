@@ -1,4 +1,4 @@
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <nutsnbolts/cyl_head_bolt.scad>
 include <keyboard/cherrymx.scad>
 include <switch/holder.scad>

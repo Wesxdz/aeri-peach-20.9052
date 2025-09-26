@@ -1,4 +1,4 @@
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 
 // Pieces to screw onto the ends of screw sliders to secure peach core
 // This can be soft to accomodate variation

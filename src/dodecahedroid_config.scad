@@ -1,8 +1,6 @@
-// Welcome Dodecahome
-
 // Default settings for ATX and ITX form factor builds
 
-
+// 1 unit is 1 cm
 
 // Panel index
 // 0 Back upper left
@@ -18,7 +16,7 @@
 // 10 Side left
 // 11 Bottom left (left back wheel)
 
-// Positions/rotations of the panels calculated with
+// Positions/rotations of the panels calculated with Python
 pos = [[0.5854101777076721, 0.0, 0.9472135305404663],
 [1.1920929132713809e-08, 0.9472135305404663, 0.5854102373123169],
 [-0.5854101777076721, 1.1920929132713809e-08, 0.9472135305404663],
@@ -81,11 +79,9 @@ build_config = "PROTOTYPE";
 
 dihedral = 116.565;
 
-// 1 unit is 1 cm
-// ATX
 // Circumradius of pentagon
+// ATX
 panel_radius = 16;
-
 // ITX
 //panel_radius=14;
 
@@ -99,16 +95,16 @@ inner_panel_radius = panel_radius-(panel_thickness-panel_Z)*2;
 // Hex vent
 
 // Production
-cell_size = 0.3;
-wall_thickness = 0.1;
+//cell_size = 0.3;
+//wall_thickness = 0.1;
 
 // Small
 // cell_size = 0.4;
 // wall_thickness = 0.2;
 
 // Large
-//cell_size = 0.6;
-//wall_thickness = .3;
+cell_size = 0.6;
+wall_thickness = .3;
 
 // Iterate
 //cell_size = 10.0;
@@ -161,7 +157,7 @@ insert_partial = insert_width-bracket_width;
 
 // Wheel Mount Panel Insert Offset;
 // ie how far from bottom of panel to difference the wheel mount insert
-wmb_pio = 5;
+wmb_pio = 7;
 
 interior_scale = (25.9789/1.40126);
 to_wheel_mount_surface = -16.9118;

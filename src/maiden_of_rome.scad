@@ -1,4 +1,4 @@
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <penta_maiden.scad>
 
 C0 = 0.809016994374947424102293417183;

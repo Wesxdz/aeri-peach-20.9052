@@ -1,4 +1,4 @@
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 include <pentagon_plate.scad>
 include <connector_pentagon_plate.scad>
 

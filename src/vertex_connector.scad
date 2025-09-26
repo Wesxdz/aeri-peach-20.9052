@@ -3,7 +3,7 @@
 // Brass insert
 include <atx_compliance.scad>
 include <nutsnbolts/cyl_head_bolt.scad>
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 
 // Constants
 C0 = 0.809016994374947424102293417183;

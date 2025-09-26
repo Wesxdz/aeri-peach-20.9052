@@ -1,5 +1,5 @@
 include <render_config.scad>
-include <dodecahome_config.scad>
+include <dodecahedroid_config.scad>
 
 module pentagon(size) {
 angle = 360 / 5;
