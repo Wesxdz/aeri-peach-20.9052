@@ -1,11 +1,11 @@
-module 608Bearing()
+module BallBearing608()
 {
     $fn=36;
     rotate([90, 0, 0])
     cylinder(.7, 1.1, 1.1);
 }
 
-module 626Bearing()
+module BallBearing626()
 {
     $fn=36;
     rotate([90, 0, 0])
@@ -16,7 +16,7 @@ module 626Bearing()
     }
 }
 
-module 626BearingCutout()
+module BallBearing626Cutout()
 {
     $fn=36;
     scale(1.05) cylinder(.6, 1.9/2, 1.9/2);

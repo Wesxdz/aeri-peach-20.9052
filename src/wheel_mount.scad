@@ -1,7 +1,8 @@
 include <nutsnbolts/cyl_head_bolt.scad>;
 include <dodecahedroid_config.scad>
 include <gt2_20_pulley.scad>
-include <608_bearing.scad>
+include <ball_bearings.scad>
+include <belt_len.scad>
 
 // Mounting bracket for wheels
 
@@ -110,7 +111,9 @@ module MountBrackets()
     //mirror([0, 0, 1]) translate([-1, -2.8, 0]) TSlotCornerBracket();
 }
 // at 6.5, then it is not flat
-panel_to_wheel_center = 7.15;
+gearmotor_dshaft_mount_cylinder_radius = 0.6;
+panel_overhang = 1.38;
+panel_to_wheel_center = gearmotor_dshaft_mount_cylinder_radius + (C - panel_thickness - panel_overhang);
 module SupportPlane(depth)
 {
 
@@ -174,7 +177,7 @@ module SupportPlane(depth)
             $fn = 32;
             // 6mm
             // TODO: Replace with 608 bearing
-            translate([0, panel_to_wheel_center-1, 0.0]) 626BearingCutout();
+            translate([0, panel_to_wheel_center-1, 0.0]) BallBearing626Cutout();
             translate([0, panel_to_wheel_center-1, 0]) cylinder(4, .3, .3);
         }
     }
@@ -186,14 +189,14 @@ module MountedWheel(depth=0.5)
     
     mirror([0, 0, 1]) color([1.0, 0.0, 1.0, 1.0]) translate([0, 0, 0]) GT2_20_Pulley();
     
-    rotate([-90, 0, 0]) 626Bearing();
+    rotate([-90, 0, 0]) BallBearing626();
     
     spacer_depth = 0.51;
     translate([0, 0, spacer_depth+depth])
     {
     // ROD HERE
     $fn=36;
-    // 6mm D shaft
+    // BOM 6mm D-shaft (40mm length)
     color([1.0, 0, 0, 1]) translate([0, 0, -2.5]) 
     difference()
     {
@@ -228,8 +231,8 @@ module MountedOmniBall(depth=0.5)
     translate([-7, -panel_to_wheel_center+3, -depth-spacer_depth]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth);
 }
 
-//mounted_wheel_depth = 0.8;
-//MountedWheel(mounted_wheel_depth);
+mounted_wheel_depth = 0.8;
+MountedWheel(mounted_wheel_depth);
 // MountedOmniBall
 
 //SupportPlane(0.5);

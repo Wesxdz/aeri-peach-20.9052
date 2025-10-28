@@ -18,6 +18,8 @@ module GT2_20_Pulley(bore_size=6, belt_width=6)
     }
 }
 
+//GT2_20_Pulley();
+
 // 5mm-20T-6mm-GT2-Pulley-W-Beari-2.jpg?v=1724433988
 module GT2_20_IdlePulley(bore_size=5, belt_width=6)
 {
@@ -38,4 +40,3 @@ module GT2_20_IdlePulley(bore_size=5, belt_width=6)
     }
 }
 
-// GT2_20_IdlePulley();

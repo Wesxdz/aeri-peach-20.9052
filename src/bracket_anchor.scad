@@ -63,12 +63,14 @@ module BeltLoop(perimeter=20.0, belt_width=0.6, start_loop_rad=0.6, end_loop_rad
 
 module MotorAttachment()
 {
+    // 1.38cm is the height above plane of the center of the pulley, this is used in calculations of wheel mount or belt length
+    //translate([2, 0, 1.38/2]) cube([1, 1, 1.38], center=true);
     GearmotorBracket();
     color([1, 0.2, 0.1, 0.8]) translate([1.65, 0, 1.5]) rotate([0, 90, 0]) BeltLoop();
     color([1.0, 0.0, 1.0, 1.0]) translate([0.8, 0, 1.4]) rotate([0, 90, 0]) GT2_20_Pulley();
 }
 
-//MotorAttachment();
+// MotorAttachment();
 //difference()
 //{
 //translate([0, 0, -panel_thickness/2]) cube([12, 12, panel_thickness], center=true);

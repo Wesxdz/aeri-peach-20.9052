@@ -162,8 +162,8 @@ hull()
 
 //
 //scale(10) color([1, 0, 0]) FleshBleed();
-rotate([0, 0, 18]) PeachCorePanel(true);
-translate([4, 8, 0]) rotate([90, 90, 0]) Battery();
+//rotate([0, 0, 18]) PeachCorePanel(true);
+//translate([4, 8, 0]) rotate([90, 90, 0]) Battery();
 //color([0.9, 0.6, 0.6, 0.8]) CoreVolume();
 
 module Battery()

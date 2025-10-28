@@ -11,7 +11,7 @@ module Hemisphere(radius, half_sep)
     }
 }
 
-module 608Bearing()
+module BallBearing608()
 {
     $fn=36;
     rotate([90, 0, 0])

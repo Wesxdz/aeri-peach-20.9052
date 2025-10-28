@@ -1,5 +1,5 @@
 include <hemisphere_transfer_unit.scad>
-include <608_bearing.scad>
+include <ball_bearings.scad>
 
 module Hemisphere(radius, half_sep)
 {
@@ -43,8 +43,8 @@ module OmniBall(radius=4.0, separation=0.8)
 //    rotate([90, 0, 0])
 //    cylinder(radius*2+separation, .7, .7);
     }
-    translate([0, -separation/2, 0]) 608Bearing();
-    translate([0, separation/2+0.7, 0]) 608Bearing();
+    translate([0, -separation/2, 0]) BallBearing608();
+    translate([0, separation/2+0.7, 0]) BallBearing608();
         
     bearing_edge = 0.5;
     // Central bolt
