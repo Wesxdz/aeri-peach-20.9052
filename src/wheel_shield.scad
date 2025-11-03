@@ -48,16 +48,10 @@ scale(0.1)
 
 module ShieldBrace()
 {
-difference()
-{
-Shield();
-translate([2.5, 2.5, 0.0]) 
-{
-BallBearing626Cutout();
-$fn=36;
-cylinder(10, 0.4, 0.4);
-}
-}
+    difference()
+    {
+    Shield(); translate([2.5, 3.3, 0])BallBearing626Cutout();
+    }
 }
 
 //ShieldBrace();

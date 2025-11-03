@@ -130,8 +130,9 @@ module MountBrackets()
 // at 6.5, then it is not flat
 gearmotor_dshaft_mount_cylinder_radius = 0.6;
 panel_overhang = 1.38;
-panel_to_wheel_center = gearmotor_dshaft_mount_cylinder_radius + (C - panel_thickness - panel_overhang);
-module SupportPlane(depth, wheel_config=2)
+back_panel_to_wheel_center = gearmotor_dshaft_mount_cylinder_radius + (C - panel_thickness - panel_overhang);
+front_panel_to_wheel_center = back_panel_to_wheel_center + 0.75;
+module SupportPlane(depth, wheel_config=2, t_slots=false, panel_to_wheel_center=back_panel_to_wheel_center, axis_radius=0.3)
 {
 
     perp_insert_form = 
@@ -152,8 +153,23 @@ module SupportPlane(depth, wheel_config=2)
         {
         union()
         {
-        linear_extrude(depth) Trapezoid(1, 5.3, panel_to_wheel_center);
-        mirror([1, 0, 0]) linear_extrude(depth) Trapezoid(1, 4, panel_to_wheel_center);
+        far_extend = 5.3;
+        short_extend = 5.3; //4
+        if (wheel_config == 1)
+        {
+            linear_extrude(depth) Trapezoid(1, far_extend, panel_to_wheel_center);
+            mirror([1, 0, 0]) linear_extrude(depth) Trapezoid(1, far_extend, panel_to_wheel_center);
+        }
+        if (wheel_config == 2)
+        { 
+            linear_extrude(depth) Trapezoid(1, far_extend, panel_to_wheel_center);
+            mirror([1, 0, 0]) linear_extrude(depth) Trapezoid(1, short_extend, panel_to_wheel_center);
+        }
+        if (wheel_config == 3)
+        { 
+            linear_extrude(depth) Trapezoid(1, short_extend, panel_to_wheel_center);
+            mirror([1, 0, 0]) linear_extrude(depth) Trapezoid(1, far_extend, panel_to_wheel_center);
+        }
         }
         translate([-12, -0.6, 0.0]) cube([24, 1-0.4, depth]); // Flat intersection
         }
@@ -161,14 +177,26 @@ module SupportPlane(depth, wheel_config=2)
         difference()
         {
             linear_extrude(depth) polygon(perp_insert_form);
+            if (t_slots)
+            {
+            translate([bracket_start+1-0.3, -bracket_height-panel_thickness-0.001, depth-t_slot_cut_depth]) cube([0.6, bracket_height+panel_thickness+0.001, t_slot_cut_depth]);
+            }
             $fn = 32;
-            translate([bracket_start+1, -bracket_height/2-panel_thickness, 1]) scale(0.1) screw("M6x16");
+            translate([bracket_start+1, -bracket_height/2-panel_thickness, 1]) 
+            {
+            scale(0.1) screw("M6x16");
+
+            }
         }
         
         mirror([1, 0, 0]) difference()
         {
             linear_extrude(depth) polygon(perp_insert_form);
             $fn = 32;
+            if (t_slots)
+            {
+            translate([bracket_start+1-0.3, -bracket_height-panel_thickness-0.001, depth-t_slot_cut_depth]) cube([0.6, bracket_height+panel_thickness+0.001, t_slot_cut_depth]);
+            }
             translate([bracket_start+1, -bracket_height/2-panel_thickness, 1]) scale(.1) screw("M6x16");
         }
         
@@ -185,25 +213,52 @@ module SupportPlane(depth, wheel_config=2)
                     {
                     translate([1.0, 0, 0]) cylinder(5, 0.25, 0.25); // M5
                     translate([-1.5, 0, 0]) cylinder(5, 0.25, 0.25);
+                    
                     } else if (wheel_config == 3)
                     {
                     translate([1.5, 0, 0]) cylinder(5, 0.25, 0.25); // M5
-                    translate([1.0, 0, 0]) cylinder(5, 0.25, 0.25);
+                    translate([-1.0, 0, 0]) cylinder(5, 0.25, 0.25);
                     }
                 }
             }
             $fn = 32;
             // 6mm
             // TODO: Replace with 608 bearing
-            translate([0, panel_to_wheel_center-1, 0.0]) BallBearing626Cutout();
-            translate([0, panel_to_wheel_center-1, 0]) cylinder(4, .3, .3);
+            if (axis_radius == 0.3)
+            {
+                translate([0, panel_to_wheel_center-1, 0.0]) BallBearing626Cutout();
+            } else
+            {
+                translate([0, panel_to_wheel_center-1, 0.0]) BallBearing608Cutout();
+            }
+            translate([0, panel_to_wheel_center-1, 0]) cylinder(4, axis_radius, axis_radius);
         }
     }
 }
 
-module MountedWheel(depth=0.5)
+module WheelShaft(shield_overlay, cut_d)
 {
-    shield_overlay = true;
+    $fn=36;
+    translate([0, 0, -2.5]) 
+    difference()
+    {   
+        if (shield_overlay)
+        {
+            cylinder(6.0, 0.3, 0.3); // Longer D shaft to span to other 626
+        } else
+        {
+            cylinder(4.0, 0.3, 0.3);
+        }
+        if (cut_d)
+        {
+            translate([0.55, 0, 0]) cube([0.6, 0.6, 10.0], true);
+        }
+    }
+}
+
+module MountedWheel(depth=0.5, wheel_config=2)
+{
+    shield_overlay = false;
     
     mirror([0, 0, 1]) color([1.0, 0.0, 1.0, 1.0]) translate([0, -2.5, 0.7]) GT2_20_IdlePulley();
     
@@ -214,21 +269,10 @@ module MountedWheel(depth=0.5)
     spacer_depth = 0.51;
     translate([0, 0, spacer_depth+depth])
     {
-    // ROD HERE
-    $fn=36;
-    // BOM 6mm D-shaft (40mm length)
-    color([1.0, 0, 0, 1]) translate([0, 0, -2.5]) 
-    difference()
-    {   
-        if (shield_overlay)
-        {
-            cylinder(6.0, 0.3, 0.3); // Longer D shaft to span to other 626
-        } else
-        {
-            cylinder(4.0, 0.3, 0.3);
-        }
-        translate([0.55, 0, 0]) cube([0.6, 0.6, 10.0], true);
-    }
+    // BOM 6mm D-shaft
+    color([1.0, 0, 0, 1]) 
+    WheelShaft(shield_overlay, true);
+
     //scale(0.1) screw("M6x45");
     
     // TODO: This uses the Pololu conversion kit now...
@@ -238,12 +282,12 @@ module MountedWheel(depth=0.5)
     // Large wheel
     // 608 bearing builtin spacer
     translate([0, 0, -0.4]) ScooterWheel(5.0);
-    color([1, 1, 1]) translate([0, -panel_to_wheel_center+1, -depth-spacer_depth]) SupportPlane(depth);
+    color([1, 1, 1]) translate([0, -panel_to_wheel_center+1, -depth-spacer_depth]) SupportPlane(depth, wheel_config, true);
     }
+    
     
     if (shield_overlay)
     {
-    
     difference()
     {
     union()
@@ -251,21 +295,26 @@ module MountedWheel(depth=0.5)
     intersection()
     {
     translate([-8, -panel_to_wheel_center+1, 0]) cube([16, 3, 3.7]);
-    translate([0, -panel_to_wheel_center+1, -depth-spacer_depth]) SupportPlane(10);
+    translate([0, -panel_to_wheel_center+1, -depth-spacer_depth]) SupportPlane(10, wheel_config, false);
     }
         difference()
         {
         scale([1, 1, 1]) translate([-2.5, 3.3, 4.3]) rotate([0, 180, 180]) ShieldBrace();
+        union()
+        {
         translate([-8, -panel_to_wheel_center-4, 0]) cube([16, 5, 10]);
+        }
         }
     }
     translate([0, -1.5, 0.8]) scale(1.0) ScooterWheelCutout(5.0);
+    WheelShaft(shield_overlay, false);
     }
     }
+
 
 }
 
-module MountedOmniBall(depth=0.5)
+module MountedOmniBall(depth=0.5, panel_to_wheel_center)
 {
     spacer_depth = 0.51;
     translate([0, 0, depth+2.4-depth]) scale(0.1) screw("M8x45");
@@ -274,14 +323,21 @@ module MountedOmniBall(depth=0.5)
     // translate([0, 0, .51+.1]) ScooterWheel(3.6);
     // Large wheel
     // 608 bearing builtin spacer
-    translate([0, 0, -spacer_depth+depth]) OmniBall(6.5);
-    translate([7, -panel_to_wheel_center+1, -depth-spacer_depth]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth);
+    //translate([0, 0, -spacer_depth+depth]) OmniBall(6.5);
+    translate([0, 0, -spacer_depth+depth]) rotate([0, 0, 90]) scale(0.1) import("omniball.stl");
     
-    translate([-7, -panel_to_wheel_center+3, -depth-spacer_depth]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth);
+    translate([7, -panel_to_wheel_center+1, 0]) rotate([0, 90, 0]) translate([0, 0, -depth/2])SupportPlane(depth, 1, false, front_panel_to_wheel_center, 0.4);
+    
+    translate([-7, -panel_to_wheel_center+1, 0]) rotate([0, 90, 0]) translate([0, 0, -depth/2]) SupportPlane(depth, 1, false, front_panel_to_wheel_center, 0.4);
 }
 
-//MountedWheel(mounted_wheel_depth);
+//MountedOmniBall(mounted_wheel_depth);
 
+//MountedWheel(mounted_wheel_depth);
+//SupportPlane(mounted_wheel_depth, 2);
 // MountedOmniBall
 
-//SupportPlane(0.5);
+//SupportPlane(mounted_wheel_depth, 2, true);
+//SupportPlane(mounted_wheel_depth, 2, false, front_panel_to_wheel_center);
+
+//MountedOmniBall(mounted_wheel_depth, front_panel_to_wheel_center);

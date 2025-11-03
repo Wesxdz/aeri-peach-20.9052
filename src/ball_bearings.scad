@@ -5,6 +5,12 @@ module BallBearing608()
     cylinder(.7, 1.1, 1.1);
 }
 
+module BallBearing608Cutout()
+{
+    $fn=36;
+    cylinder(.7, 1.1, 1.1);
+}
+
 module BallBearing626()
 {
     $fn=36;

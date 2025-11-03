@@ -15,11 +15,11 @@ module WheelMountPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
 mounted_wheel_depth = 0.8 + .002;
 translate([0, 0, 0])
 {
-    translate([-wmb_pio, 0, -panel_to_wheel_center+0.5+panel_thickness*1.65]) rotate([-90, 0, -90]) 
-    //MountedOmniBall();
+    translate([-wmb_pio, 0, -back_panel_to_wheel_center+0.5+panel_thickness*1.65]) rotate([-90, 0, -90]) 
     MountedWheel(mounted_wheel_depth);
 }
 }
+
 
 module WheelMountSlots(wheel_config)
 {
@@ -40,6 +40,8 @@ module WheelMountSlots(wheel_config)
         cube([mounted_wheel_depth, insert_width, 1]);
         $fn=36;
         translate([mounted_wheel_depth+1.4, insert_width-1, .4]) scale(0.1) screw("M6x16");
+        
+        translate([0, insert_width-1-.3, panel_thickness-t_slot_cut_depth]) cube([4, 0.6, t_slot_cut_depth]);
         }
         
         mirror([0, 1, 0])
@@ -48,6 +50,7 @@ module WheelMountSlots(wheel_config)
         cube([mounted_wheel_depth, insert_width, 1]);
         $fn=36;
         translate([mounted_wheel_depth+1.4, insert_width-1, .4]) scale(0.1) screw("M6x16");
+        translate([0, insert_width-1-.3, panel_thickness-t_slot_cut_depth]) cube([4, 0.6, t_slot_cut_depth]);
         }
         }
     }
@@ -130,7 +133,9 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                     // In triwheel mode, the front wheel faces directly forward
 
                         if (wheel_config == 1)
-                        {                            
+                        {
+                            translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio) + 2.3, 0, -front_panel_to_wheel_center + 0.5 + panel_thickness * 1.65])
+                            rotate([-90, 0, -90]) MountedOmniBall(mounted_wheel_depth, front_panel_to_wheel_center);
                             // Use Omniball Brace
                         } else
                         {
@@ -143,16 +148,16 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                             translate([0, -shift_forward_dist, 0])
                             // The exact displacement of the front wheel mount to be even with the side wheels
                             // depends on the profile of the scooter wheels for exact calculation
-                            translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio), 0, -panel_to_wheel_center + 0.5 + panel_thickness * 1.65])
+                            translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio), 0, -back_panel_to_wheel_center  + 0.5 + panel_thickness * 1.65])
                             rotate([-90, 0, -90])
                             union()
                             {
-                            MountedWheel(mounted_wheel_depth);
+                            MountedWheel(mounted_wheel_depth, wheel_config);
                             }
                             rotate([0, 0, 180]) translate([wmb_pio-0.8, wheel_config == 3 ? -0.5: 0.5, panel_thickness]) MotorAttachment();
                             }
                         } else {
-                            translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio), 0, -panel_to_wheel_center + 0.5 + panel_thickness * 1.65])
+                            translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio), 0, -back_panel_to_wheel_center  + 0.5 + panel_thickness * 1.65])
                             rotate([-90, 0, -90])
                             //MountedOmniBall();
                             MountedWheel(mounted_wheel_depth);
@@ -185,8 +190,15 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                 {
                     hull()
                     {
+                    if (wheel_config == 2)
+                    {
                     translate([0, 1.5, 0]) cylinder(4, 0.4, 0.4, $fn=64);
                     translate([0, -1, 0]) cylinder(4, 0.4, 0.4, $fn=64);
+                    } else
+                    {
+                    translate([0, 1, 0]) cylinder(4, 0.4, 0.4, $fn=64);
+                    translate([0, -1.5, 0]) cylinder(4, 0.4, 0.4, $fn=64);
+                    }
                     }
                 }
                 rotate([0, 0, 180]) translate([wmb_pio-0.8, 0.0, panel_thickness]) GearmotorBracketScrewHoles();
@@ -288,4 +300,4 @@ rotate([0, -tetra_a, 0])
 
 }
 
-//WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), true, show_rest=false, 2);
+//WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), true, show_rest=false, 1);

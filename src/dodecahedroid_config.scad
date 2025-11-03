@@ -181,3 +181,5 @@ module BrassInsertHolder()
     $fn=64;
     cylinder(0.4, 0.5, 0.5);
 }
+
+t_slot_cut_depth = panel_thickness/2;
