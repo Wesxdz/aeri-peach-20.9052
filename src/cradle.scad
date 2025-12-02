@@ -11,14 +11,16 @@ module Cradle()
 // Export
 //translate([0, 0, 209])
 //scale(10)
-rotate([0, -tetra_a, 180])
+rotate([0, 0, -120])
+//rotate([0, -tetra_a, 180])
 rotate([0, 0, -30-120-120])
 //rotate([0, 0, -30])
 
 union()
 {
-color([0.3, 0.3, 0.4, 1]) translate([0, 0, -260/10])
-scale(0.1) import("vertex_connector_power_variant_mm.stl");
+color([0.3, 0.3, 0.4, 1]) 
+//translate([0, 0, -260/10])
+//scale(0.1) import("vertex_connector_power_variant_mm.stl");
 
 rotate([0, 0, 30])
 difference()
@@ -38,19 +40,19 @@ $fn=128;
                 show_mounts = true;
                 if (i == 4)
                 {
-                    import ("wheel_panel_2.stl");
-                    // WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 2);
+                    //import ("_wheel_panel_2.stl");
+                    WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 2);
                 }
                 
                 if (i == 11) 
                 {
-                    import ("wheel_panel_3.stl");
+                    //import ("_wheel_panel_3.stl");
                     // WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), show_mounts , show_rest=false, 3);
                 }
                 
                 if (i == 9) 
                 {
-                    import ("wheel_panel_1.stl");
+                    //import ("_wheel_panel_1.stl");
                     // WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1, 1]), true, show_rest=false, 1);
                     //translate([0, 0, -7]) scale(0.1) import("omniball.stl");
                 }

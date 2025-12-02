@@ -306,7 +306,7 @@ module MountedWheel(depth=0.5, wheel_config=2)
         }
         }
     }
-    translate([0, -1.5, 0.8]) scale(1.0) ScooterWheelCutout(5.0);
+    translate([0, -1.5, 0.8]) panel_to_wheel_centerscale(1.0) ScooterWheelCutout(5.0);
     WheelShaft(shield_overlay, false);
     }
     }
@@ -333,11 +333,11 @@ module MountedOmniBall(depth=0.5, panel_to_wheel_center)
 
 //MountedOmniBall(mounted_wheel_depth);
 
-//MountedWheel(mounted_wheel_depth);
+MountedWheel(mounted_wheel_depth);
 //SupportPlane(mounted_wheel_depth, 2);
 // MountedOmniBall
 
-//SupportPlane(mounted_wheel_depth, 2, true);
-//SupportPlane(mounted_wheel_depth, 2, false, front_panel_to_wheel_center);
+//SupportPlane(mounted_wheel_depth, 3, true);
+//SupportPlane(mounted_wheel_depth, 1, false, front_panel_to_wheel_center, 0.4);
 
 //MountedOmniBall(mounted_wheel_depth, front_panel_to_wheel_center);

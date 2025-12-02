@@ -175,7 +175,12 @@ module WheelPanelPrefab(rotation, radius, cell_size, wall_thickness, thickness, 
                 difference() {
                     ConnectorPentagonPlate(radius, cell_size, wall_thickness, thickness, border_edge, true, render_color, [3, 3, 6, 3, 3], [4, wheel_config == 2 ? 14 : 4, wheel_config == 1 ? 22 : 19, wheel_config == 3 ? 14 : 4, 4], [wheel_config == 1 ? 1 : 0, 0, 1, 0, wheel_config == 1 ? 1 : 0], [standard_secure_spacing, standard_secure_spacing, power_secure_spacing, standard_secure_spacing, standard_secure_spacing]);
                 }
-                if (wheel_config != 1)
+                if (wheel_config == 1)
+                {
+                    // Diff omniball mount slits
+                    translate([(wheel_config == 1 ? -wmb_pio / 2 : -wmb_pio) + 2.3, 0, -front_panel_to_wheel_center + 0.5 + panel_thickness * 1.65]) rotate([-90, 0, -90]) MountedOmniBall(mounted_wheel_depth, front_panel_to_wheel_center);
+                }
+                else
                 {
                 rotate_wheel_z = wheel_config == 2 ? -standard_side_wheel_tilt : (wheel_config == 3 ? standard_side_wheel_tilt : (wheel_config == 1 ? -90 : 0));
                 
@@ -300,4 +305,4 @@ rotate([0, -tetra_a, 0])
 
 }
 
-//WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), true, show_rest=false, 1);
+WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), false, show_rest=false, 1);

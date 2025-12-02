@@ -15,7 +15,7 @@ include <cargo_bay_hatch.scad>
 include <core_platform.scad>
 include <camera_panel.scad>
 // include <atx_compliance.scad>
-include <vertex_composite.scad>
+// include <vertex_composite.scad>
 //include <penta_composite.scad>
 
 //if (true)
@@ -66,11 +66,11 @@ for (i = [0 : len(pos)-1]) {
         }
         else if (i == 11) 
         {
-            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 3);
+            //WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 3);
         }
         else if (i == 9) 
         {
-            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 1);
+            //WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 1);
         }
        else if (i == 6)
         {

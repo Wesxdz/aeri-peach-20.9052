@@ -103,12 +103,12 @@ inner_panel_radius = panel_radius-(panel_thickness-panel_Z)*2;
 // wall_thickness = 0.2;
 
 // Large
-cell_size = 0.6;
-wall_thickness = .3;
+//cell_size = 0.6;
+//wall_thickness = .3;
 
 // Iterate
-//cell_size = 10.0;
-//wall_thickness = .01;
+cell_size = 10.0;
+wall_thickness = .01;
 
 // The distance from a corner to the center of an M3 hole (for connectors)
 // the radius is centered at the base corner
