@@ -45,5 +45,6 @@ rotate([0, 0, 72*i]) translate([inner_panel_radius, 0, 0]) rotate([0, -tetra_a, 
 
 // Swap VertexPlatformDock/Screw temporarily
 
+//PanelSubConnectors();
 //PanelSubConnectorsCradle();
 //PanelSubConnectorsDockHoles([1, 1, 1, 1, 1]);

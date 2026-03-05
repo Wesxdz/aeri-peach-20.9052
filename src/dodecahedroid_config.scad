@@ -46,8 +46,9 @@ rots = [
 ];
 
 // These rotations align the panel edges
-panel_rots = [36, -36*4.5, 0, 18 - 72*2, 180+36, -18, 18, -18, 18+72, 18+72, 18, -36];
-//panel_rots = [36, -36*4.5, 0, 18, 180, -18, 18, -18, 18, 18+36, 18, 0];
+//panel_rots = [36, -36*4.5, 0, 18 - 72*2, 180+36, -18, 18, -18, 18+72, 18+72, 18, -36];
+
+panel_rots = [36, -36*4.5, 0, 18, 180, -18, 18, -18, 18, 18+36, 18, 0];
 
 // 0 is Nose Cone
 // 1 is Bridge
@@ -81,9 +82,15 @@ dihedral = 116.565;
 
 // Circumradius of pentagon
 // ATX
-panel_radius = 16;
+//panel_radius = 16;
 // ITX
 //panel_radius=14;
+
+panel_radius = 14;
+// In order to fit on a 250mm plate the max radius is 12.5 cm!
+//panel_radius = 12.5;
+
+dodecahedron_radius = 1/.688 * panel_radius;
 
 panel_thickness = .3;
 
@@ -145,6 +152,19 @@ tetra_a = 37.3774;
 // 20.9052
 // Tetrahedron C
 magic_angle = atan(panel_edge_length/height_stack);
+
+// The height of the tetrahedron to cut off from the vertex connectors
+vertex_tehtra_height_truncation = 1.2;
+// The height of the triangle cut from the point of each pentagon with its base toward the center
+effective_thickness = panel_thickness/2;
+
+// Apply this to the truncation formula
+theta = atan(panel_thickness/panel_Z);
+panel_inner_offset = panel_thickness/sin(theta);
+
+// I'm not sure how to derive .465 from trig but basically it's the extra pentagon cutoff due to the panel thickness (the calculation is complicated by the inclined cutoff of the panel)
+// if panel thickness changes then it should be updated to ensure the 
+pentagon_point_truncation = ((vertex_tehtra_height_truncation + panel_thickness * 0.465)/ sin(tetra_a));
 
 RAM = 128; // ;)
 

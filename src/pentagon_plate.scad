@@ -79,5 +79,3 @@ module PentagonPlate(radius, cell_size, wall_thickness, thickness, border_edge, 
     }
     panel();
   }
-  
-//scale(10) PentagonPlate(panel_radius, 0.3, 0.1, panel_thickness, border_edge, true, [0, 1, 1, 1]);

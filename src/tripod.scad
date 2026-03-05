@@ -27,8 +27,8 @@ for (a = [0, 120, 240]) {
         // Place and Rotate the base sphere
         translate([r, 0, 0]) 
             rotate([0, -tilt_angle, 0]) // Tilt inward toward center
-            scale(0.02) import("omniball.stl");
-                //sphere(sphere_r);
+            //scale(0.02) import("omniball.stl");
+            sphere(sphere_r);
         
         // Create the rod using hull
         hull() {

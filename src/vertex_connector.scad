@@ -76,7 +76,7 @@ for (f = [0 : 0]) {
 }
 }
 
-module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, show_screws=false, power_variant=true)
+module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, show_screws=false, power_variant=false, dodeca_cut = 2.88386, lower_dodeca=0.0)
 {
 
     secure =  (power_variant ? 1: secure);
@@ -86,9 +86,10 @@ module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, s
     theta = atan(panel_thickness/panel_Z);
     panel_inner_offset = panel_thickness/sin(theta);
     screw_count = 3;
-    
-    dodeca_cut = 2.88386;
 
+    // Truncation cutout
+    difference()
+    {
     rotate([0, 0, 0])
     translate([0, 0, dodeca_cut])
     difference()
@@ -100,14 +101,14 @@ module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, s
     {
     difference()
     {
-    scale(panel_radius)
+    scale(16) // WTF This was originally panel_radius, but then reduction of that fucked it up
     {
     if (power_variant)
     {
         Dodecahedron(0.1);
     } else
     {
-        Dodecahedron();
+        translate([0, 0, 0.0]) Dodecahedron(lower_dodeca);
     }
     }
     //translate([0, 0, -dodeca_cut + vertex_cutoff/2]) cube([10, 10, vertex_cutoff], center=true);
@@ -158,7 +159,7 @@ module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, s
         }
         }
     }
-    }    
+    }
     
     if (show_screw_holes && vertex_cutoff > 0.0)
     {
@@ -184,8 +185,6 @@ module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, s
     rotate([0, 180, 0]) translate([0, 0, dodeca_cut-vertex_cutoff]) scale(0.1) screw("M3x30");
     }
     
-    // TODO: Procedural truncation for babies and oldies
-    
     // TODO: Prefab variant with triangle hole for power coord
     if (power_variant)
     {
@@ -200,6 +199,9 @@ module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, s
         }
     }
     }
+    }
+    // Procedural truncation for babies, oldies, and hot math girls
+    color([0, 1, 0, 0.5]) translate([0, 0, vertex_tehtra_height_truncation*0.5]) cube([100, 100, vertex_tehtra_height_truncation], center=true);
     }
 }
 
@@ -273,13 +275,20 @@ module PiSections(slices)
     }
 }
 
-module VertexNotch(sections=[1, 1, 1], secure=0, vertex_cutoff = 0.0, show_screw_holes=true, show_screws=false, power_variant=false)
+module VertexNotch(sections=[1, 1, 1], secure=0, vertex_cutoff = 0.0, show_screw_holes=true, show_screws=false, power_variant=false, rounded_variant=true)
 {
     intersection()
     {
         PiSections(sections);
         //PiSections([0, 0, 1]);
+        if (rounded_variant)
+        {
+            VertexConnectorV2();
+        }
+        else
+        {
         VertexConnector(secure, vertex_cutoff, show_screw_holes, show_screws, power_variant);
+        }
     }
 }
 
@@ -296,4 +305,119 @@ module VertexNotch(sections=[1, 1, 1], secure=0, vertex_cutoff = 0.0, show_screw
 //}
 
 //scale(10) VertexNotch([1, 0, 0], secure=1, power_variant=false);
-//scale(10) VertexNotch([0, 1, 1], secure=0, power_variant=false);
+
+
+module BeveledVertexConnector(bevel_radius = 0.5, $fn = 24) {
+    // 1. We use minkowski to round the edges
+    minkowski() {
+        // 2. Shrink the object slightly so the bevel 
+        // doesn't make the connector too large to fit the panels
+        VertexConnector(show_screw_holes=false, dodeca_cut = 0.88386, lower_dodeca=-0.05);
+        
+        // 3. This is the "brush" that creates the smoothness
+        sphere(r = bevel_radius);
+    }
+}
+
+//scale(10) VertexNotch([1, 1, 1], secure=0, power_variant=false);
+
+module VertexConnectorScrewHoles(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, show_screws=false, power_variant=false, dodeca_cut = 2.88386)
+{
+
+    secure =  (power_variant ? 1: secure);
+    multi_secure_spacing = power_variant ? power_secure_spacing : standard_secure_spacing;
+    // Nut hold vs heat insert versions...
+
+    theta = atan(panel_thickness/panel_Z);
+    panel_inner_offset = panel_thickness/sin(theta);
+    screw_count = 3;
+    
+
+    rotate([0, 0, 0])
+    translate([0, 0, dodeca_cut])
+    difference()
+    {
+        show_inserts = true;
+        hex_nut_slot = false;
+        screw_offset = pcorner_dist + (power_variant ? pcorner_dist : 0.0);
+    if (show_screw_holes)
+    {
+    for (i = [0:screw_count])
+    {
+        for (j = [0:secure])
+        {
+        union()
+        {
+        rotate([0, 0, -30+screw_count*10 + 360/screw_count*i])
+        {
+        // Due to the vertex connector being offset to the inner volume, the 'distance from corner' is calculated from the outside of the panels
+        translate([secure*((j-0.5)*multi_secure_spacing*2), 0, 0.0])
+        translate([0, 0, -dodeca_cut-panel_inner_offset])
+        rotate([tetra_a, 0, 0])
+        {
+        translate([0, screw_offset, 0.28]) // .28 is an approximate value...
+        {
+            union()
+            {
+            cylinder(5, (0.3+screw_clearance)/2, (0.3+screw_clearance)/2);
+            BrassInsert();
+            translate([0, 0, 2]) scale(0.1) nutcatch_parallel("M3", 8.0);
+            }
+        }
+        
+        }
+        }
+        }
+        }
+    }
+    }
+    }
+    }
+
+    $fn=36*2;
+
+// M8 rods for the structural frame to support cargo
+module FrameRods(central_diplacement=25)
+{
+for (i = [0:2])
+{
+    rotate([0, -magic_angle, 30+120*i])
+    // TODO: This should be calculated to fit a multiple of 10mm so that m8 rods
+    // can be sourced in a correct size
+    translate([central_diplacement, 0, 8])
+    rotate([0, 90, 0]) cylinder(100, 4, 4);
+}
+}
+
+
+module VertexConnectorV2()
+{
+//Dodecahedron();
+// To render the smooth version:
+scale(0.1)
+rotate([0, 0, 0])
+difference()
+{
+difference()
+{
+union()
+{
+color([1, 1, 0, 0.2]) translate([0, 0, 5.28+18.5]) scale(10) BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+//FrameRods();
+}
+union()
+{
+FrameRods();
+translate([0, 0, 0]) cube([100, 100, vertex_tehtra_height_truncation*10*2], center=true);
+translate([0, 0, 20.5+5.3+18.5]) scale(10) BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+}
+}
+union()
+{
+scale(10) VertexConnectorScrewHoles();
+}
+}
+}
+//VertexConnectorScrewHoles();
+//scale(10) rotate([0, 180, 0]) VertexConnectorV2();
+//VertexConnector();

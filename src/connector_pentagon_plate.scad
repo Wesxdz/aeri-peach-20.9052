@@ -83,6 +83,30 @@ module ConnectorPentagonPlate(radius, cell_size, wall_thickness, thickness, bord
     //place_connector_screws(top_radius, distances_from_corners, thickness, secure, secure_spacing);
   }
   
-//ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, "#ffffff");
+module TrucatedPlate()
+//{
+difference()
+{
+
+ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff");
+panel_cutout = panel_radius-4;
+cylinder(panel_height, panel_cutout, panel_cutout);
+    for (i = [0:5])
+    {
+        rotate([0, 0, i*(360/5)])
+        translate([panel_radius*2-pentagon_point_truncation, 0, 0]) 
+        {
+        hull()
+        {
+        trunc_cut = tan(90-tetra_a)*panel_thickness*2;
+        cube([panel_radius*2+trunc_cut, panel_radius*2+trunc_cut, 0.001], center=true);
+        translate([0, 0, panel_thickness]) cube([panel_radius*2, panel_radius*2, 0.001], center=true);
+        }
+        }
+    }
+}
+//$fn=36*2;  
+//scale(10) TrucatedPlate();
+//ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff");
 //ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), [3, 3, 6, 3, 3], [4, 4, 19, 4, 4], [0, 0, 1, 0, 0], [0, 0, power_secure_spacing, 0, 0]);
 //ConnectorPentagonPlateScrews(panel_radius, 0.3, 0.1, panel_thickness, border_edge, false, color([0, 1, 1, 1]));

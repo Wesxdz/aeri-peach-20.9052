@@ -35,6 +35,14 @@ include <camera_panel.scad>
 //PSUVolume();
 //}
 
+dodecahedron_radius = 1/.688 * panel_radius;
+color([0.5, 0.5, 0.5, 0.5])
+sphere(dodecahedron_radius);
+echo("Hello");
+echo(dodecahedron_radius);
+
+translate([0, 0, -dodecahedron_radius/2])
+cube([5, 5, 35*3]);
 show_cradle_vent = true;
 rotate([0, 0, 180])
 difference()
@@ -42,7 +50,8 @@ difference()
 rotate([-magic_angle, 0, 0])
 {
 for (i = [0 : len(pos)-1]) {
-    if(face_groups[i] == 3)
+    if (false)
+    //if(face_groups[i] == 3)
     {
     translate(pos[i]*panel_edge_length) rotate(rots[i]) rotate([0, 0, panel_rots[i]])
     if (!render_fast_iter)
@@ -70,7 +79,8 @@ for (i = [0 : len(pos)-1]) {
         }
         else if (i == 9) 
         {
-            //WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 1);
+            
+            WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, show_cradle_vent, color([0, 1, 1]), true, show_rest=false, 1);
         }
        else if (i == 6)
         {

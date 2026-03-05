@@ -305,4 +305,4 @@ rotate([0, -tetra_a, 0])
 
 }
 
-WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), false, show_rest=false, 1);
+//WheelPanelPrefab(36, panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), false, show_rest=false, 1);
