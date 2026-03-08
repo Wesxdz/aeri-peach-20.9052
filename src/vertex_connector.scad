@@ -108,7 +108,7 @@ module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, s
         Dodecahedron(0.1);
     } else
     {
-        translate([0, 0, 0.0]) Dodecahedron(lower_dodeca);
+        Dodecahedron(lower_dodeca);
     }
     }
     //translate([0, 0, -dodeca_cut + vertex_cutoff/2]) cube([10, 10, vertex_cutoff], center=true);
@@ -275,6 +275,12 @@ module PiSections(slices)
     }
 }
 
+module FastPowerVert()
+{
+translate([0, 0, -0.124])
+import("beveled_power_vertex_connector.stl");
+}
+
 module VertexNotch(sections=[1, 1, 1], secure=0, vertex_cutoff = 0.0, show_screw_holes=true, show_screws=false, power_variant=false, rounded_variant=true)
 {
     intersection()
@@ -283,7 +289,13 @@ module VertexNotch(sections=[1, 1, 1], secure=0, vertex_cutoff = 0.0, show_screw
         //PiSections([0, 0, 1]);
         if (rounded_variant)
         {
-            VertexConnectorV2();
+            if (power_variant)
+            {
+                FastPowerVert();
+            } else
+            {
+                VertexConnectorV2();
+            }
         }
         else
         {
@@ -355,11 +367,12 @@ module VertexConnectorScrewHoles(secure=0, vertex_cutoff = 0.0, show_screw_holes
         translate([0, 0, -dodeca_cut-panel_inner_offset])
         rotate([tetra_a, 0, 0])
         {
-        translate([0, screw_offset, 0.28]) // .28 is an approximate value...
+        // Power variant -0.3
+        translate([0, screw_offset, 0.28-0.30]) // .28 is an approximate value...
         {
             union()
             {
-            cylinder(5, (0.3+screw_clearance)/2, (0.3+screw_clearance)/2);
+            cylinder(15, (0.3+screw_clearance)/2, (0.3+screw_clearance)/2);
             BrassInsert();
             translate([0, 0, 2]) scale(0.1) nutcatch_parallel("M3", 8.0);
             }
@@ -420,4 +433,58 @@ scale(10) VertexConnectorScrewHoles();
 }
 //VertexConnectorScrewHoles();
 //scale(10) rotate([0, 180, 0]) VertexConnectorV2();
-//VertexConnector();
+//VertexConnector(power_variant=true);
+
+// Power Variant Beveled Vertex Connector
+// Note: Ensure your include files (dodecahedroid_config.scad, etc.) are in the same folder.
+
+module BeveledPowerVertexConnector(bevel_radius = 0.3) {
+    // 1. Move everything to a consistent scale
+    difference() {
+        // MAIN BODY
+        minkowski() {
+            // We use the base power variant but slightly undersized for the bevel
+            VertexConnector(
+                power_variant = true, 
+                show_screw_holes = false, 
+                dodeca_cut = 2.88386 + 0.5, 
+                lower_dodeca = 0.0
+            );
+            $fn = 24; // Keep fn lower for minkowski to avoid long render times
+            sphere(r = bevel_radius);
+        }
+
+        // 2. SCREW HOLES & INSERTS
+        // Explicitly calling the holes at the same scale as the body
+        VertexConnectorScrewHoles(power_variant = true, secure = 1);
+
+        // 3. POWER PASSTHROUGH
+        // Re-cutting the center hull to ensure the minkowski didn't "fill" it
+        $fn = 64;
+        hull() {
+            for (i = [0:2]) {
+                rotate([0, 0, 60 + i * 120]) 
+                translate([0, 4, -10]) 
+                cylinder(h = 30, r = 1.2, center = true);
+            }
+        }
+
+        // 4. ARTIFACT REMOVAL (The "Bottom Flatten")
+        // This cuts off the rounded "minkowski bowl" at the bottom
+        // Adjust the '2.8' value to match your desired floor height
+        translate([0, 0, -5 + 2.88386]) 
+            cube([50, 50, 10], center = true);
+    }
+}
+
+// Global resolution for holes
+$fn = 8;
+
+VertexConnectorScrewHoles(power_variant = false, secure = 0);
+// Render
+//BeveledPowerVertexConnector(bevel_radius = 0.3);
+
+//translate([0, 0, 0]) VertexConnector(power_variant=false);
+
+translate([0, 0, 0])
+Dodecahedron(0.1);

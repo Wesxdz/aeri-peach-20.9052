@@ -45,7 +45,7 @@ segment_len = 350/rail_holes(MGN12, 350);
 
 //translate([4, (MGN12H_carriage[3]-MGN12[1])/2-1+7, 350-20])  rotate([0, 90, 90]) UPulley();
 
-extended = 1.0;
+extended = 0.0;
 
 my_rail = MGN12; 
 
@@ -55,7 +55,6 @@ my_carriage = MGN12H_carriage;
 rail_len = 350;
 pos = 350/2 - MGN12H_carriage[1]/2 - segment_len*0.5-6;
 
-// TODO: How do create rail profile w/o holes?
 
 
 module RoundTri(rad=1, corner_rad=1, height = 1)
@@ -213,13 +212,12 @@ rail_h = MGN12[2];
 difference()
 {
 
-translate([-rail_h /2, -MGN12H_carriage[3]/2, -segment_len/4])
-union()
-{
-cube([rail_h *2, MGN12H_carriage[3], (segment_len*3/4)+MGN12[5]]);
-translate([0, 0, -segment_len/4])
-cube([rail_h *2, MGN12H_carriage[3], segment_len]);
-}
+translate([-rail_h / 2, -MGN12H_carriage[3] / 2, -segment_len / 2])
+    cube([
+        rail_h * 2, 
+        MGN12H_carriage[3], 
+        segment_len + MGN12[5]
+    ]);
 
     union()
     {
@@ -322,45 +320,57 @@ union()
 }
 
 
+function endcap_padding_bottom() = 10 + (segment_len / 4); // This is your z_lift
+function endcap_extension_top()   = 10 + (MGN12[5] / 2 * 2); // Padding + rail hole dia
+
+// Total Physical Height (What you asked for first)
+function get_endcap_total_height() = 
+    (segment_len * 0.75) + endcap_extension_top();
+
+// Height minus the slot (The "Solid" base thickness)
+function get_endcap_base_thickness() = 
+    endcap_padding_bottom();
+
 
 module RailEndcapSecondTopMount()
 {
-rail_h = MGN12[2];
-mirror([0, 1, 0])
-difference()
-{
-translate([-rail_h /2-8+1, -MGN12H_carriage[3]/2, -segment_len/4-8-2])
-cube([rail_h+8*2-1, MGN12H_carriage[3], 2+8+(segment_len*3/4)+MGN12[5]]);
+    rail_h = MGN12[2];
+    rail_w = MGN12[1];
+    c_len  = MGN12H_carriage[3];
+    rail_hole_r = MGN12[5] / 2; 
+    
+    total_h = get_endcap_total_height();
+    z_lift  = endcap_padding_bottom(); // This is the "base thickness" before the slot
 
-union()
-{
-    translate([-MGN12[2]/2-0.05, -MGN12[1]/2-0.05, 0])
-    cube([MGN12[2]+0.1, MGN12[1]+0.1, 350]);
+    mirror([0, 1, 0])
+    difference()
+    {
+        // 1. The Main Block
+        translate([-rail_h / 2 - 7, -c_len / 2, 0])
+            cube([rail_h + 15, c_len, total_h]);
+
+        // 2. The Rail Slot (Starts after the base thickness)
+        translate([-rail_h / 2 - 0.05, -rail_w / 2 - 0.05, z_lift])
+            cube([rail_h + 0.1, rail_w + 0.1, rail_len]);
+
+        // 3. Rail Mounting Holes
+        translate([0, 0, segment_len / 2 + z_lift])
+        union() {
+            rotate([0, 90, 0]) cylinder(rail_h * 2, rail_hole_r, rail_hole_r);
+            rotate([0, -90, 0]) cylinder(rail_h * 2, m3_rad, m3_rad);
+            translate([-10.5, 0, 0])
+                rotate([0, -90, 0])
+                scale([1.08, 1.04, 1.04]) nut_trap_inline(2.5, "M3");
+        }
+        
+        // 4. 8mm Rod Slot & Nut Trap
+        translate([rail_h + 0.05 - 8, 30, -6 + z_lift])
+            rotate([90, 0, 0]) cylinder(100, 4.1, 4.1);
+        
+        translate([rail_h + 0.05 - 8, c_len / 2, -6 + z_lift])
+            rotate([90, 30, 0])
+            scale([1.04, 1.02, 1.02]) nut_trap_inline(4.5, "M8");
     }
-
-    translate([0, 0, segment_len/2])
-    rotate([0, 90, 0])
-    cylinder(MGN12[2]*2, MGN12[5]/2, MGN12[5]/2);
-    
-    translate([0, 0, segment_len/2])
-    rotate([0, -90, 0])
-    cylinder(MGN12[2]*2, m3_rad, m3_rad);
-    
-    translate([-2.5-8, 0, segment_len/2])
-    rotate([0, -90, 0])
-    scale([1.08, 1.04, 1.04])
-    nut_trap_inline(2.5, "M3");
-    
-    // 8mm rod slot
-    translate([MGN12[2]+0.05-4-4, 30, -6])
-    rotate([90, 0, 0])
-    cylinder(100, 4.1, 4.1);
-    
-    translate([MGN12[2]+0.05-4-4, MGN12H_carriage[3]/2, -6])
-    rotate([90, 30, 0])
-    scale([1.04, 1.02, 1.02])
-    nut_trap_inline(4.5, "M8");
-}
 }
 
 
@@ -376,6 +386,18 @@ module Stage1RopeAnchor()
     translate([MGN12[2]/2, 0, -segment_len/2]) cylinder(5, m3_rad, m3_rad);
     }
 }
+
+// When the EndcapAnchor piece is integrated into the vertex connector
+// it is necessary to pursue a distinct strategy for rope passthrough
+module StageOneVertexAnchor()
+{
+    c_len  = MGN12H_carriage[3];
+    rope_passthrough_radius = 2.3;
+    // TODO: These holes should line up with the pulley centerline
+    translate([MGN12[2]/2, c_len/2+rope_passthrough_radius, -segment_len/2]) cylinder(100, rope_passthrough_radius, rope_passthrough_radius);
+    translate([MGN12[2]/2, -c_len/2-rope_passthrough_radius, -segment_len/2]) cylinder(100, rope_passthrough_radius, rope_passthrough_radius);
+}
+
 //color([0.5, 0.6, 0.7, 0.5]) RailEndcapSecondTopMount();
 
 // TODO: If it causes friction with the bearing, cutout a ring on the top
@@ -463,19 +485,37 @@ for (i = [0:2])
 }
 }
 
+//translate([0, 0, segment_len/2])
+//rotate([0, -90, 0]) CarriageMount();
+//import("vertical_carriage_mount.stl");
+
 module Stage_1()
 {
 translate([0, 0, 350/2]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos);
 Stage1RopeAnchor();
 translate([0, 0, 350]) rotate([0, 180, 180]) RailEndcapTopMount();
+color([1, 0.5, 0, 0.5]) translate([0, MGN12H_carriage[3]/1.5, 350+6]) rotate([-90, 0, 0]) UPulley();
 }
 
+module TelescopingLift()
+{
 Stage_1();
 // my_carriage[1]-my_carriage[2] + 350/2+extended*(350/2*2-50)
-translate([20, 0, my_carriage[1]-my_carriage[2] + 350/2+extended*(350/2*2-50)]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos+-my_carriage[1]);
+color([0.4, 0.4, 0.5, 1.0])
+translate([20-MGN12[2], MGN12H_carriage[3]/2, 0]) rotate([0, 0, 180]) import("vertical_carriage_mount.stl");
+translate([20, 0, my_carriage[1]-my_carriage[2] + 350/2+extended*(350/2*2-50)]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos-my_carriage[1]);
+// The second stage pulley is the major profile concern
+color([1, 0, 0, 0.5]) translate([20, -MGN12H_carriage[3]/1.5, 350+16]) rotate([90, 0, 0]) UPulley();
+translate([24, 0, get_endcap_base_thickness()+350+10]) rotate([0, 180, 0]) RailEndcapSecondTopMount();
 
 // Just the rail w/o carriage on the final one!
+color([0.6, 0.6, 0.7, 1.0])
+translate([17*2-MGN12[2], -MGN12H_carriage[3]/2, 13]) rotate([0, 0, 180]) mirror([0, 1, 0]) import("vertical_carriage_mount.stl");
 translate([17*2, 0, ((my_carriage[1]-my_carriage[2])*2) + 350/2+extended*(350/2*4-100)]) rotate([0, 90, 0])  rail_profile(carriage_rail(my_carriage), rail_len);
+}
+
+ //Stage1RopeAnchor();
+
 
 // Specify endcap params
 // Distance extending beyond rail end
