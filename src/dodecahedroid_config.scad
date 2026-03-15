@@ -48,7 +48,7 @@ rots = [
 // These rotations align the panel edges
 //panel_rots = [36, -36*4.5, 0, 18 - 72*2, 180+36, -18, 18, -18, 18+72, 18+72, 18, -36];
 
-panel_rots = [36, -36*4.5, 0, 18, 180, -18, 18, -18, 18, 18+36, 18, 0];
+panel_rots = [36-72, -36*4.5, 72*3, 18, 180, -18, 18, -18, 18+72, 18+36, 18, 0];
 
 // 0 is Nose Cone
 // 1 is Bridge
@@ -164,6 +164,8 @@ panel_inner_offset = panel_thickness/sin(theta);
 
 // I'm not sure how to derive .465 from trig but basically it's the extra pentagon cutoff due to the panel thickness (the calculation is complicated by the inclined cutoff of the panel)
 // if panel thickness changes then it should be updated to ensure the 
+
+// TODO: This seems to actually be incorrect with regard to base mount
 pentagon_point_truncation = ((vertex_tehtra_height_truncation + panel_thickness * 0.465)/ sin(tetra_a));
 
 RAM = 128; // ;)

@@ -36,20 +36,23 @@ include <camera_panel.scad>
 //}
 
 dodecahedron_radius = 1/.688 * panel_radius;
-color([0.5, 0.5, 0.5, 0.5])
-sphere(dodecahedron_radius);
-echo("Hello");
-echo(dodecahedron_radius);
 
-translate([0, 0, -dodecahedron_radius/2])
-cube([5, 5, 35*3]);
 show_cradle_vent = true;
-rotate([0, 0, 180])
+scale(10)
+rotate([-tetra_a, 0, 0])
+rotate([0, 0, 120])
+rotate([0, 180, 180])
 difference()
 {
 rotate([-magic_angle, 0, 0])
 {
 for (i = [0 : len(pos)-1]) {
+    //if (face_groups[i] == 0)
+    if (i == 0)
+    {
+    translate(pos[i]*panel_edge_length) rotate(rots[i]) rotate([0, 0, panel_rots[i]])
+    CradlePanel();
+    }
     if (false)
     //if(face_groups[i] == 3)
     {
@@ -144,6 +147,9 @@ hull()
         rotate([0, 0, 60+i*120]) translate([0, 4, 5]) sphere(1.0);
     }
 }
+
+// Cutout top passthrough circle
+cylinder(100, 4.2, 4.2);
 }
 //
 //import("baby_platform.stl");

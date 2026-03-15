@@ -50,11 +50,20 @@ translate(pos[i]*inner_panel_edge_length) rotate(rots[i]) rotate([0, 0, standard
     {
         if (face_groups [i] == 3)
         {
-            PanelSubConnectorsCradle();
+            //PanelSubConnectorsCradle();
+        } else if (i == 0)
+        {
+            PanelSubConnectorsNoseCone(array=[1, 1, 1, 1, 3]);
+        } else if (i == 2)
+        {
+            PanelSubConnectorsNoseCone(array=[1, 1, 1, 3, 1]);
+        } else if (i == 8)
+        {
+            PanelSubConnectorsNoseCone(array=[1, 3, 1, 1, 1]);
         }
         else
         {
-            PanelSubConnectors(full_connectors, notch_security[i]);
+            //PanelSubConnectors(full_connectors, notch_security[i]);
         }
     }
 }
@@ -153,7 +162,16 @@ translate([0, 0, -8]) cube([50, 50, 12], center=true);
 //}
 //}
 
-PentaVolume();
+// $fn=12;
+// scale(10) translate([0, 0, dodecahedron_radius+vertex_tehtra_height_truncation]) 
+// {
+//     PentaVolume();
+    //import("vertex_composite_core.stl");
+// }
+// translate([0, 0, -dodecahedron_radius-vertex_tehtra_height_truncation]) rotate([0, 0, 30]) scale(.1) import("lift_mount_vertex_connector.stl");
+//color([1, 0, 0, 1])
+//scale(10) translate([0, 0, -dodecahedron_radius-vertex_tehtra_height_truncation]) rotate([0, 0, 30]) scale(.1) import("telescoping_lift.stl");
+ //rotate([0, 0, 30]) IntegratedLift();
 
 //PlatformPentaVolume();
 

@@ -16,8 +16,6 @@ module BrassInsert()
 //$fn=36*2;
 $fn=16;
 
-// TODO: Should carriage be facing 'backwards' to the previous stage or 'forwards' to hold the next stage?
-
 module Torus(R=100, r=1) {
     rotate_extrude(convexity = 10)
         translate([R, 0, 0]) 
@@ -41,128 +39,171 @@ module UPulley()
     }
 }
 
-segment_len = 350/rail_holes(MGN12, 350);
 
-//translate([4, (MGN12H_carriage[3]-MGN12[1])/2-1+7, 350-20])  rotate([0, 90, 90]) UPulley();
+module UPulleySmall()
+{
+    radius = 15.5;
+    h = 5;
+    difference() {
 
-extended = 0.0;
+    union()
+    {
+    difference()
+    {
+    cylinder(h, radius, radius);
+    union()
+    {
+    translate([0, 0, h/2]) Torus(radius, 1.5);
+    translate([0, 0, h/2]) Torus(radius-1, 1.5);
 
-my_rail = MGN12; 
+    cylinder(h, 19/2, 19/2); // 626
 
-my_carriage = MGN12H_carriage;
-
-// 3. Define dimensions
-rail_len = 350;
-pos = 350/2 - MGN12H_carriage[1]/2 - segment_len*0.5-6;
-
-
+    }
+    }
+    translate([0, 0, h]) cylinder(2, radius, radius/2);
+    }
+    
+        cylinder(h+10, 3.1, 3.1); // 626
+    }
+}
 
 module RoundTri(rad=1, corner_rad=1, height = 1)
 {
     linear_extrude(height)
     {
-    hull()
-    {
-    translate([sin(0)*rad, cos(0)*rad, 0]) circle(corner_rad);
-    translate([sin(120)*rad, cos(120)*rad, 0]) circle(corner_rad);
-    translate([sin(240)*rad, cos(240)*rad, 0]) circle(corner_rad);
-    }
+        hull()
+        {
+            translate([sin(0)*rad, cos(0)*rad, 0]) circle(corner_rad);
+            translate([sin(120)*rad, cos(120)*rad, 0]) circle(corner_rad);
+            translate([sin(240)*rad, cos(240)*rad, 0]) circle(corner_rad);
+        }
     }
 }
-//
-//translate([20, 0, 0]) 
-//scale(10)
-//rotate([0, 0, -90])
-//difference()
-//{
-//    RoundTri(3.5, 1, 100);
-//    translate([0, 0, -0.05]) RoundTri(3.4, 0.7, 100.1);
-//}
 
-// TODO: Add the carriage/rail attachment holes
-// TODO: Add a V grip to help secure the next rail... (difference scaled rail)
-// TODO: Add a mechanism to mount rope anchor
-// Should the mount that doesn't support the base of a rail be shorter? ie cap to 1 rail screw center
-echo(segment_len);
+
+extended = 1.0;
+my_rail = MGN12; 
+my_carriage = MGN12H_carriage;
+rail_len = 350;
+segment_len = rail_len/rail_holes(MGN12, rail_len);
+pos = rail_len/2 - MGN12H_carriage[1]/2 - segment_len*0.5-6;
 m3_rad = 1.5+0.05;
-module CarriageMount(carriage=my_carriage)
+
+module CarriageMount(carriage=my_carriage, include_cutouts=true)
 {
-    c_width = carriage[2];
-    mount_width = segment_len*3;
-    c_len = carriage[3];
-    s_spacing = carriage[6];
+    L1 = carriage[2];
+    W  = carriage[3];
+    C  = carriage[6];
+    
+    Wr = MGN12[1];
+    Hr = MGN12[2];
+    
+    mount_length = segment_len * 3;
     mount_height = 8;
     
     difference()
     {
-    
-    union()
-    {
-    translate([-segment_len/2, -c_len*0.3, 0])
-    cube([segment_len/2, c_len*1.3, mount_height + 8]); 
-    
-    difference()
-    {
-    union()
-    {
-    cube([mount_width , c_len, mount_height]);
-    translate([0, -c_len*0.3, 0])
-    cube([segment_len-1, c_len*1.3, mount_height + 8]); 
-    }
-    
-    union()
-    {
-        translate([segment_len * 3/2 - s_spacing/2, 0, 0])
-        union() {
-            // Define the base offsets for the grid
-            base_y = (c_len - s_spacing) / 2;
+        union()
+        {
+            // This is the 'block portion below the rail'
+            translate([-segment_len/2, -W*0.3, 0])
+            cube([segment_len/2, W*1.3, mount_height + 8]); 
+            
+            difference()
+            {
+                union()
+                {
+                    // This is the 'backbone block' of the entire mount
+                    cube([mount_length, W, mount_height]);
+                    
+                    // The is the block that encompasses the rail
+                    translate([0, -W*0.3, 0])
+                    cube([segment_len-1, W*1.3, mount_height + 8]); 
+                }
 
-            for (x_offset = [0, s_spacing]) {
-                for (y_offset = [0, s_spacing]) {
-                    translate([x_offset, base_y + y_offset, 0]) {
-                        // Main screw hole
-                        cylinder(16, m3_rad, m3_rad);
-                        
-                        // Countersink / Nut trap (mirrored from mount_height)
-                        translate([0, 0, mount_height]) 
-                            mirror([0, 0, 1]) 
-                            cylinder(3.0, 5.68/2, 5.68/2);
+                if (include_cutouts)
+                {
+            
+                union()
+                {
+                    // Carriage Bolt Pattern
+                    // Translating along X by (mount_length*0.5 - C/2)
+                    translate([mount_length/2 - C/2, 0, 0])
+                    union() {
+                        // Centering the holes along the Width (Y-axis)
+                        base_y = (W - C) / 2;
+
+                        for (x_offset = [0, C]) {
+                            for (y_offset = [0, C]) {
+                                translate([x_offset, base_y + y_offset, 0]) {
+                                    cylinder(16, m3_rad, m3_rad);
+                                    
+                                    translate([0, 0, mount_height]) 
+                                        mirror([0, 0, 1]) 
+                                        cylinder(3.0, 5.68/2, 5.68/2);
+                                }
+                            }
+                        }
                     }
+                
+                    // Rail Mounting Holes (X-axis center line)
+                    translate([0, W/2, 0])
+                    {
+                        linear_extrude(30)
+                        {
+                            rail_hole_positions(MGN12, 350)
+                            circle(r = m3_rad);
+                        }
+                        rail_hole_positions(MGN12, 350)
+                        scale(1.01) nut_trap_inline(2.5, "M3");
+                    }
+                }
+
                 }
             }
         }
-    
-        translate([0, c_len/2, 0])
+
+        if (include_cutouts())
         {
-        linear_extrude(30)
-        {
-        rail_hole_positions(MGN12, 350)
-        //circle(d = rail_hole(MGN12));
-        circle(r = m3_rad);
-        }
-        rail_hole_positions(MGN12, 350)
-        scale(1.01) nut_trap_inline(2.5, "M3");
-        }
-        }
         
-        // TODO Nut catchments...
-    }
-    
+        // Rail Clearance Cutout
+        // Centered on W/2 (Width center line)
+        color([1, 0, 0, 1])
+        translate([0, W/2 - Wr/2, Hr + mount_height])
+        rotate([0, 90, 0])
+        cube([Hr+0.1, Wr+0.1, 350]);
 
-    
-    }
-    color([1, 0, 0, 1])
-    translate([0, c_len/2-MGN12[1]/2, MGN12[2]+mount_height])
-    rotate([0, 90, 0])
-    cube([MGN12[2]+0.1, MGN12[1]+0.1, 350]);
+        // Rope Slot (For the Dyneema spine)
+        // Offset by W*1.5 (Width-based offset)
+        translate([-segment_len/4, W*1.5, (Hr+mount_height)/2])
+        rotate([90, 0, 0])
+        cylinder(W*3, 2, 2);
 
-    // rope slot
-    translate([-segment_len/4, c_len*1.5, (MGN12[2]+mount_height)/2])
-    rotate([90, 0, 0])
-    cylinder(c_len*3, 2, 2);
-    
+        }
+
     }
 }
+
+module CarriageMountRail()
+{
+    L1 = carriage[2];
+    W  = carriage[3];
+    C  = carriage[6];
+    
+    Wr = MGN12[1];
+    Hr = MGN12[2];
+    
+    mount_length = segment_len * 3;
+    mount_height = 8;
+
+    color([1, 0, 0, 1])
+    translate([0, W/2 - Wr/2, Hr + mount_height])
+    rotate([0, 90, 0])
+    cube([Hr+0.1, Wr+0.1, 350]);
+}
+
+
+
 //-my_carriage[2]-(my_carriage[1]-my_carriage[2])/2
 //color([0.5, 0.5, 1.0, 0.7])
 //rotate([0, 90, 0])
@@ -245,6 +286,39 @@ translate([-rail_h / 2, -MGN12H_carriage[3] / 2, -segment_len / 2])
 }
 }
 
+
+module RailEndcapAnchorBlock()
+{
+rail_h = MGN12[2];
+
+translate([-rail_h / 2, -MGN12H_carriage[3] / 2, 0])
+    cube([
+        rail_h * 2, 
+        MGN12H_carriage[3], 
+        segment_len + MGN12[5]-(segment_len/2)
+    ]);
+    
+    // translate([0, 0, segment_len/2])
+    // rotate([0, -90, 0])
+    // cylinder(MGN12[2]*2, m3_rad, m3_rad);
+}
+
+//RailEndcapAnchorBlock();
+
+module RailEndcapRail()
+{
+rail_h = MGN12[2];
+difference()
+{
+    pullback = 0;
+    union()
+    {
+    translate([-0.05, -MGN12[1]/2-0.05, 0])
+    translate([-pullback, 0, 0]) cube([MGN12[2]+0.1+pullback, MGN12[1]+0.1, 350]);
+    }
+}
+}
+
 //color([0.5, 0.5, 0.5, 0.5])
 //RailEndcap();
 
@@ -280,6 +354,7 @@ union()
 
 //RailEndcapBackMount();
 
+rail_endcap_height = 2+8+(segment_len*3/4)+MGN12[5];
 module RailEndcapTopMount()
 {
 rail_h = MGN12[2];
@@ -319,6 +394,163 @@ union()
 }
 }
 
+
+rec_tall_diff = 23.5;
+rail_endcap_height_tall = rail_endcap_height+rec_tall_diff;
+module RailEndcapTopMountTall()
+{
+rail_h = MGN12[2];
+difference()
+{
+translate([-rail_h /2-8, -MGN12H_carriage[3]/2, -segment_len/4-8-2-rec_tall_diff])
+cube([rail_h *2+8, MGN12H_carriage[3], rail_endcap_height_tall]);
+
+union()
+{
+    translate([-0.05, -MGN12[1]/2-0.05, 0])
+    cube([MGN12[2]+0.1, MGN12[1]+0.1, 350]);
+    }
+
+    translate([0, 0, segment_len/2])
+    rotate([0, 90, 0])
+    cylinder(MGN12[2]*2, MGN12[5]/2, MGN12[5]/2);
+    
+    translate([0, 0, segment_len/2])
+    rotate([0, -90, 0])
+    cylinder(MGN12[2]*2, m3_rad, m3_rad);
+    
+    translate([-2.5-8, 0, segment_len/2])
+    rotate([0, -90, 0])
+    scale([1.08, 1.04, 1.04])
+    nut_trap_inline(2.5, "M3");
+    
+    // 8mm rod slot
+    translate([MGN12[2]+0.05-4-4, 30, -6])
+    rotate([90, 0, 0])
+    cylinder(100, 4, 4);
+    
+    translate([MGN12[2]+0.05-4-4, MGN12H_carriage[3]/2, -6])
+    rotate([90, 30, 0])
+    scale([1.04, 1.02, 1.02])
+    nut_trap_inline(2.5, "M8");
+}
+}
+
+module SecurePassthroughScrews()
+{
+    // 1. Local Scoping: Matches the Cube's dimensions exactly
+    rail_h = MGN12[2];
+    c_width = MGN12H_carriage[3];
+    
+    B_WIDTH  = rail_h * 2 + 16;  // Local X
+    B_DEPTH  = c_width + 14;     // Local Y
+    B_HEIGHT = 22;               // Local Z
+    
+    padding = 10;
+
+    // 2. Wrap in the EXACT same transform as the block
+    translate([-9, 0, 0])
+    rotate([90, 180, 0])
+    translate([-rail_h / 2 - 16, -c_width / 2 - 14, -segment_len / 4 - 10])
+    {
+        // If you want screws passing through the 'Front/Back' face (the 32x22 face):
+        // The cylinder height must be the DEPTH of the block (B_DEPTH)
+        for (x = [padding/2, B_HEIGHT - padding/2]) {
+            for (z = [padding, B_WIDTH - padding]) {
+                translate([x, -1, z]) // Position on X and Z, blow through Y
+                rotate([-90, 0, 0])   // Rotate cylinder to point through the Y-axis
+                cylinder(B_DEPTH + 2, 1.8, 1.8, $fn = 32);
+            }
+        }
+    }
+}
+
+module SecurePassthroughBrassInserts()
+{
+    // 1. Local Scoping: Matches the Cube's dimensions exactly
+    rail_h = MGN12[2];
+    c_width = MGN12H_carriage[3];
+    
+    B_WIDTH  = rail_h * 2 + 16;  // Local X
+    B_DEPTH  = c_width + 14;     // Local Y
+    B_HEIGHT = 22;               // Local Z
+    
+    padding = 10;
+
+    // 2. Wrap in the EXACT same transform as the block
+    translate([-9, 0, 0])
+    rotate([90, 180, 0])
+    translate([-rail_h / 2 - 16, -c_width / 2 - 14, -segment_len / 4 - 10])
+    {
+        // If you want screws passing through the 'Front/Back' face (the 32x22 face):
+        // The cylinder height must be the DEPTH of the block (B_DEPTH)
+        for (x = [padding/2, B_HEIGHT - padding/2]) {
+            for (z = [padding, B_WIDTH - padding]) {
+                translate([x, -1, z]) // Position on X and Z, blow through Y
+                rotate([-90, 0, 0])   // Rotate cylinder to point through the Y-axis
+                cylinder(B_DEPTH + 2, (0.5-0.02)/2*10, (0.5-0.02)/2*10, $fn = 32);
+            }
+        }
+    }
+}
+
+module SecurePassthroughScrewHeads()
+{
+    // 1. Local Scoping: Matches the Cube's dimensions exactly
+    rail_h = MGN12[2];
+    c_width = MGN12H_carriage[3];
+    
+    B_WIDTH  = rail_h * 2 + 16;  // Local X
+    B_DEPTH  = c_width + 14;     // Local Y
+    B_HEIGHT = 22;               // Local Z
+    
+    padding = 10;
+
+    // 2. Wrap in the EXACT same transform as the block
+    translate([-9, 0, 0])
+    rotate([90, 180, 0])
+    translate([-rail_h / 2 - 16, -c_width / 2 - 14, -segment_len / 4 - 10])
+    {
+        // If you want screws passing through the 'Front/Back' face (the 32x22 face):
+        // The cylinder height must be the DEPTH of the block (B_DEPTH)
+        for (x = [B_HEIGHT - padding/2]) {
+            for (z = [padding, B_WIDTH - padding]) {
+                translate([x, -1, z]) // Position on X and Z, blow through Y
+                rotate([-90, 0, 0])   // Rotate cylinder to point through the Y-axis
+                cylinder(r = 2.75, h = B_DEPTH + 2, $fn = 32);
+            }
+        }
+    }
+}
+
+module SecurePassthroughScrewHeadsUpper()
+{
+    // 1. Local Scoping: Matches the Cube's dimensions exactly
+    rail_h = MGN12[2];
+    c_width = MGN12H_carriage[3];
+    
+    B_WIDTH  = rail_h * 2 + 16;  // Local X
+    B_DEPTH  = c_width + 14;     // Local Y
+    B_HEIGHT = 22;               // Local Z
+    
+    padding = 10;
+
+    // 2. Wrap in the EXACT same transform as the block
+    translate([-9, 0, 0])
+    rotate([90, 180, 0])
+    translate([-rail_h / 2 - 16, -c_width / 2 - 14, -segment_len / 4 - 10])
+    {
+        // If you want screws passing through the 'Front/Back' face (the 32x22 face):
+        // The cylinder height must be the DEPTH of the block (B_DEPTH)
+        for (x = [padding/2]) {
+            for (z = [padding, B_WIDTH - padding]) {
+                translate([x, -1, z]) // Position on X and Z, blow through Y
+                rotate([-90, 0, 0])   // Rotate cylinder to point through the Y-axis
+                cylinder(r = 2.75, h = B_DEPTH + 2, $fn = 32);
+            }
+        }
+    }
+}
 
 function endcap_padding_bottom() = 10 + (segment_len / 4); // This is your z_lift
 function endcap_extension_top()   = 10 + (MGN12[5] / 2 * 2); // Padding + rail hole dia
@@ -392,10 +624,11 @@ module Stage1RopeAnchor()
 module StageOneVertexAnchor()
 {
     c_len  = MGN12H_carriage[3];
-    rope_passthrough_radius = 2.3;
+    rope_passthrough_radius = 2.5;
     // TODO: These holes should line up with the pulley centerline
-    translate([MGN12[2]/2, c_len/2+rope_passthrough_radius, -segment_len/2]) cylinder(100, rope_passthrough_radius, rope_passthrough_radius);
-    translate([MGN12[2]/2, -c_len/2-rope_passthrough_radius, -segment_len/2]) cylinder(100, rope_passthrough_radius, rope_passthrough_radius);
+    //translate([MGN12[2]/2, c_len/2+rope_passthrough_radius*5, -segment_len/2]) cylinder(100, rope_passthrough_radius, rope_passthrough_radius);
+    upulley_rad = 20;
+    translate([MGN12[2]/2-upulley_rad, -c_len/2-rope_passthrough_radius*4.5, -segment_len/2]) cylinder(100, rope_passthrough_radius, rope_passthrough_radius);
 }
 
 //color([0.5, 0.6, 0.7, 0.5]) RailEndcapSecondTopMount();
@@ -489,6 +722,16 @@ for (i = [0:2])
 //rotate([0, -90, 0]) CarriageMount();
 //import("vertical_carriage_mount.stl");
 
+module Stage_1Top()
+{
+translate([0, 0, 350]) rotate([0, 180, 180]) RailEndcapTopMount();
+}
+
+module Stage_1Connect()
+{
+translate([0, 0, 350]) rotate([0, 180, 180]) color([0, 1, 0, 0.2]) RailEndcapTopMountTall();
+}
+
 module Stage_1()
 {
 translate([0, 0, 350/2]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos);
@@ -503,15 +746,15 @@ Stage_1();
 // my_carriage[1]-my_carriage[2] + 350/2+extended*(350/2*2-50)
 color([0.4, 0.4, 0.5, 1.0])
 translate([20-MGN12[2], MGN12H_carriage[3]/2, 0]) rotate([0, 0, 180]) import("vertical_carriage_mount.stl");
-translate([20, 0, my_carriage[1]-my_carriage[2] + 350/2+extended*(350/2*2-50)]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos-my_carriage[1]);
+translate([20, 0, my_carriage[1]-my_carriage[2] + 350/2+extended*(350/2*2-50)]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos);
 // The second stage pulley is the major profile concern
-color([1, 0, 0, 0.5]) translate([20, -MGN12H_carriage[3]/1.5, 350+16]) rotate([90, 0, 0]) UPulley();
+color([1, 0, 0, 0.5]) translate([24, -MGN12H_carriage[3]/1.5, 350+16]) rotate([90, 0, 0]) UPulley();
 translate([24, 0, get_endcap_base_thickness()+350+10]) rotate([0, 180, 0]) RailEndcapSecondTopMount();
 
 // Just the rail w/o carriage on the final one!
-color([0.6, 0.6, 0.7, 1.0])
-translate([17*2-MGN12[2], -MGN12H_carriage[3]/2, 13]) rotate([0, 0, 180]) mirror([0, 1, 0]) import("vertical_carriage_mount.stl");
-translate([17*2, 0, ((my_carriage[1]-my_carriage[2])*2) + 350/2+extended*(350/2*4-100)]) rotate([0, 90, 0])  rail_profile(carriage_rail(my_carriage), rail_len);
+// color([0.6, 0.6, 0.7, 1.0])
+// translate([17*2-MGN12[2], -MGN12H_carriage[3]/2, 13]) rotate([0, 0, 180]) mirror([0, 1, 0]) import("vertical_carriage_mount.stl");
+// translate([17*2, 0, ((my_carriage[1]-my_carriage[2])*2) + 350/2+extended*(350/2*4-100)]) rotate([0, 90, 0])  rail_profile(carriage_rail(my_carriage), rail_len);
 }
 
  //Stage1RopeAnchor();
@@ -527,3 +770,39 @@ translate([17*2, 0, ((my_carriage[1]-my_carriage[2])*2) + 350/2+extended*(350/2*
 
 // What if we just start by testing the basic endcap functionality?
 
+
+// TODO: We need to 
+//translate([-MGN12[2], MGN12H_carriage[3]/2, 0]) rotate([0, 0, 180]) import("vertical_carriage_mount.stl");
+// my_carriage[1]-my_carriage[2] + 
+//translate([0, 0, rail_len/2]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, pos);
+//TelescopingLift();
+
+// TODO: Replace seg_len/2 with a more semantic term like 'anchor rope block height'
+
+stage_width = my_carriage[4] + 8;
+
+module LiftStage()
+{
+translate([-my_carriage[4], 0, segment_len/2])
+{
+    translate([-MGN12[2], MGN12H_carriage[3]/2, 0]) rotate([0, -90, 180]) CarriageMount();
+    // L1 excludes carriage plastic end caps
+    // TODO: Replace seg_len+1 with 'rail encapsulation height'
+    lowest_pos = rail_len/2 - MGN12H_carriage[1]/2 - segment_len+1;
+    translate([0, 0, rail_len/2]) rotate([0, 90, 0])  rail_assembly(my_carriage, rail_len, lowest_pos);
+}
+}
+
+// segment_len/2-1-m3_rad
+//LiftStage();
+stage_link_offset = [stage_width, 0, m3_rad+1+(my_carriage[2]-my_carriage[6])/2];
+//translate(stage_link_offset) LiftStage(); // -my_carriage[6]/2
+//CarriageMount();
+
+//CarriageMount(include_cutouts=false);
+//CarriageMountRail();
+
+// $fn=36;
+// translate([0, 0, 10])
+// color([1, 0, 0, 1]) UPulley();
+// UPulleySmall();

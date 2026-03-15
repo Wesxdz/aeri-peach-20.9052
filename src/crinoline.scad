@@ -35,7 +35,7 @@ module Torus(R=100, r=1) {
 module Crinoline()
 {
     // --- Editable Settings ---
-    hoop_count = 13;           
+    hoop_count = 12;           
     hoop_thickness = 0.2; // 2mm radius
     total_height = 100;        
     
@@ -64,12 +64,21 @@ module Crinoline()
         // At h_ratio 1 (top), current_R = top_radius
         current_R = bottom_radius + (top_radius - bottom_radius) * t;
         
-        translate([0, 0, z_pos])
-            Torus(R = current_R, r = hoop_thickness);
+        if (i < 8)
+        {
+            color([0.5, 0.5, 0.5, 0.5])
+            translate([0, 0, z_pos])
+                Torus(R = current_R, r = hoop_thickness);
+        } else
+        {
+            color([1, 1, 0, 1])
+            translate([0, 0, z_pos])
+                Torus(R = current_R, r = hoop_thickness);
+        }
     }
 }
 
-//Crinoline();
+Crinoline();
 
 //translate([0, 0, dodecahedron_radius])
 //color([0.5, 0.5, 0.5, 0.5])

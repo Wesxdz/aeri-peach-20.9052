@@ -1,4 +1,4 @@
-// Dodecahedron
+// Depreciated in favor of vertex_structure.scad
 
 // Brass insert
 include <atx_compliance.scad>
@@ -480,11 +480,11 @@ module BeveledPowerVertexConnector(bevel_radius = 0.3) {
 // Global resolution for holes
 $fn = 8;
 
-VertexConnectorScrewHoles(power_variant = false, secure = 0);
+//VertexConnectorScrewHoles(power_variant = false, secure = 0);
 // Render
 //BeveledPowerVertexConnector(bevel_radius = 0.3);
 
 //translate([0, 0, 0]) VertexConnector(power_variant=false);
 
-translate([0, 0, 0])
-Dodecahedron(0.1);
+// translate([0, 0, 0])
+// Dodecahedron(0.1);
