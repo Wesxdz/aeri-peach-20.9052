@@ -36,8 +36,8 @@ module Crinoline()
 {
     // --- Editable Settings ---
     hoop_count = 12;           
-    hoop_thickness = 0.2; // 2mm radius
-    total_height = 100;        
+    hoop_thickness = 0.1; // 2mm radius
+    total_height = 75;        
     
     bottom_radius = dodecahedron_radius+2;        // Wide base
     top_radius = 16;//dodecahedron_radius/2;           // Narrow top
@@ -78,7 +78,83 @@ module Crinoline()
     }
 }
 
-Crinoline();
+module CurvedShell(thickness = 1.0, slices = 60)
+{
+    // --- Inherited Settings from your script ---
+    hoop_count = 12; // Used here for vertical smoothness
+    total_height = 75;
+    bottom_radius = dodecahedron_radius + 2;
+    top_radius = 16;
+    curve_factor = 3.5;
+
+    // Generate the 2D profile for the wall
+    // We create a series of points for the outer curve, then the inner curve
+    profile_points = concat(
+        // Outer Wall (Bottom to Top)
+        [for (i = [0 : slices]) 
+            let (h_ratio = i / slices)
+            let (t = pow(h_ratio, curve_factor))
+            let (r = bottom_radius + (top_radius - bottom_radius) * t)
+            [r, h_ratio * total_height]
+        ],
+        // Inner Wall (Top back to Bottom)
+//        [for (i = [slices : -1 : 0]) 
+//            let (h_ratio = i / slices)
+//            let (t = pow(h_ratio, curve_factor))
+//            let (r = (bottom_radius + (top_radius - bottom_radius) * t) - thickness)
+//            [r, h_ratio * total_height]
+//        ]
+    );
+
+    rotate_extrude(convexity = 10, $fn = 64) {
+        polygon(profile_points);
+    }
+}
+
+//CurvedShell();
+
+module ThinCurvedShell(slices = 60)
+{
+    total_height = 75;
+    bottom_radius = 40; 
+    top_radius = 16;
+    curve_factor = 3.5;
+
+    // Generate only the single-line profile
+    profile_points = [
+        for (i = [0 : slices]) 
+            let (h_ratio = i / slices)
+            let (t = pow(h_ratio, curve_factor))
+            let (r = bottom_radius + (top_radius - bottom_radius) * t)
+            [r, h_ratio * total_height]
+    ];
+
+    // To get a non-solid mesh, we use a very tiny thickness 
+    // OR we use the 'polygon' with only the curve and a return to the axis
+    // However, the best way for a "shell" is to create a very thin offset.
+    
+    // If you truly want a single-skin mesh for Blender:
+    rotate_extrude(convexity = 10, $fn = 64) {
+        // We create a line with a negligible width (0.01) 
+        // because OpenSCAD cannot render a 0-width polygon.
+        offset(delta = 0.01) {
+            for (i = [0 : len(profile_points)-2]) {
+                line(profile_points[i], profile_points[i+1]);
+            }
+        }
+    }
+}
+
+module line(start, end) {
+    hull() {
+        translate(start) circle(0.001);
+        translate(end) circle(0.001);
+    }
+}
+
+ThinCurvedShell();
+
+//Crinoline();
 
 //translate([0, 0, dodecahedron_radius])
 //color([0.5, 0.5, 0.5, 0.5])

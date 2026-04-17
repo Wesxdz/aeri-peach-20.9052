@@ -86,6 +86,7 @@ module VertexConnectorSimple(height=0.2)
     }
 }
 
+// TODO: VERTEX STRUCTURE IS THE NEWER VERSION OF VERTEX_CONNECTOR.SCAD
 module VertexConnector(height=0.2, rounding=0.2, truncate=0.03, prism_radius = 0.02, vertex_cut=2.5) 
 {
     // The main translate for the whole part
@@ -102,24 +103,28 @@ module VertexConnector(height=0.2, rounding=0.2, truncate=0.03, prism_radius = 0
                     scale(100) Dodecahedron_Grounded();
                     
                     // Center prism (also shrunk slightly for rounding)
-                    difference() {
 
-                        cylinder(h = (height+truncate)*10, r = prism_radius - rounding, $fn=36*2, center=true); // $fn = 3
+                    // CUTOUT FOR THE TOP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // ALSO CHANGE VertexConnectorScrewHoles multi_secture_spacing: TODO REFACTOR THIS SO IT'S POSSIBLE TO
+                    // OUTPUT BOTH THE TOP AND BOTTOM VARIANTS
+                    // difference() {
 
-                        plat_w = 10;
-                        plat_d = 5;
-                        // MGN[2]/2
-                        plat_x_offsets = [-plat_w/2 - 4, -5];
-                        plat_y_offsets = [1, 2.0];
-                        for (i = [0:1]) {
-                            rotate([0, 0, 60+(360/4) * i]) {
-                                // We move the cube OUTWARD by the 'rounding' amount 
-                                // so the minkowski expansion puts the flat face exactly where you want it.
-                                translate([plat_x_offsets[i], plat_y_offsets[i], 0])
-                                    cube([plat_w, plat_d, 10]);
-                            }
-                        }
-                    }
+                    //     cylinder(h = (height+truncate)*10, r = prism_radius - rounding, $fn=36*2, center=true); // $fn = 3
+
+                    //     plat_w = 10;
+                    //     plat_d = 5;
+                    //     // MGN[2]/2
+                    //     plat_x_offsets = [-plat_w/2 - 4, -5];
+                    //     plat_y_offsets = [1, 2.0];
+                    //     for (i = [0:1]) {
+                    //         rotate([0, 0, 60+(360/4) * i]) {
+                    //             // We move the cube OUTWARD by the 'rounding' amount 
+                    //             // so the minkowski expansion puts the flat face exactly where you want it.
+                    //             translate([plat_x_offsets[i], plat_y_offsets[i], 0])
+                    //                 cube([plat_w, plat_d, 10]);
+                    //         }
+                    //     }
+                    // }
                 }
             }
 
@@ -141,11 +146,101 @@ module VertexConnector(height=0.2, rounding=0.2, truncate=0.03, prism_radius = 0
     }
 }
 
+module BeveledVertexConnector(bevel_radius = 0.5, $fn = 24) {
+    // 1. We use minkowski to round the edges
+    minkowski() {
+        // 2. Shrink the object slightly so the bevel 
+        // doesn't make the connector too large to fit the panels
+        VertexConnector(show_screw_holes=false, dodeca_cut = 0.88386, lower_dodeca=-0.05);
+        
+        // 3. This is the "brush" that creates the smoothness
+        sphere(r = bevel_radius);
+    }
+}
+
+
+module VertexConnectorV2()
+{
+//Dodecahedron();
+// To render the smooth version:
+scale(0.1)
+rotate([0, 0, 0])
+difference()
+{
+difference()
+{
+union()
+{
+color([1, 1, 0, 0.2]) translate([0, 0, 5.28+18.5]) scale(10) BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+//FrameRods();
+}
+union()
+{
+FrameRods();
+translate([0, 0, 0]) cube([100, 100, vertex_tehtra_height_truncation*10*2], center=true);
+translate([0, 0, 20.5+5.3+18.5]) scale(10) BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+}
+}
+union()
+{
+scale(10) VertexConnectorScrewHoles();
+}
+}
+}
+
+
+module VertexConnectorV2Top()
+{
+
+tri_extend = 2.5;
+translate([0, 0, -tri_extend])
+linear_extrude(tri_extend +vertex_tehtra_height_truncation)
+{
+projection()
+{
+scale(0.1)
+rotate([0, 0, 0])
+difference()
+{
+color([1, 1, 0, 0.2]) translate([0, 0, 5.28+18.5]) scale(10) BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+translate([0, 0, vertex_tehtra_height_truncation*10*2]) cube([100, 100, vertex_tehtra_height_truncation*10*2], center=true);
+}
+}
+}
+}
+
+
+module VertexConnectorToTriangularPrism()
+{
+scale(10) rotate([0, 180, 0]) 
+{
+VertexConnectorV2();
+
+union()
+{
+difference()
+{
+VertexConnectorV2Top();
+
+rotate([-magic_angle*2, 0, 0])
+translate([0, 51.1, 0])
+cube(100, center=true);
+
+// This is the cube that cuts off the bottom part of the triangular prism
+// from the perspective of the ground flat plane
+rotate([-magic_angle*2, 0, 0])
+translate([0, 0, -7.2])
+cube(12, center=true);
+}
+}
+}
+}
+
 
 module VertexConnectorScrewHoles(secure=1, rounding=0.0, pent_h = pcorner_dist)
 {
-    //multi_secure_spacing = 1.75; // Bottom panel...
-    multi_secure_spacing = 3.5; // Top panel...
+    multi_secure_spacing = 1.75; // Bottom panel...
+    //multi_secure_spacing = 3.5; // Top panel...
 
     theta = atan(panel_thickness/panel_Z);
     panel_inner_offset = panel_thickness/sin(theta);
@@ -190,7 +285,7 @@ module VertexConnectorScrewHoles(secure=1, rounding=0.0, pent_h = pcorner_dist)
     }
 }
 
-module FrameRods(central_diplacement=25+30) // Displacment plus 30 for passthrough connector
+module FrameRods(central_diplacement=25) // Displacment plus 30 for passthrough connector
 {
 scale(0.1)
 for (i = [0:2])
@@ -199,7 +294,7 @@ for (i = [0:2])
     // TODO: This should be calculated to fit a multiple of 10mm so that m8 rods
     // can be sourced in a correct size
     translate([central_diplacement, 0, 8])
-    rotate([0, 90, 0]) cylinder(100, 4.1, 4.1);
+    rotate([0, 90, 0]) cylinder(100, 4.1, 4.1, $fn=36);
 }
 }
 
@@ -211,10 +306,11 @@ difference()
 VertexConnector(height, rounding, truncate, prism_radius, vertex_cut);
 union()
 {
-VertexConnectorScrewHoles(rounding=rounding, secure=secure, pent_h=pent_h);
 FrameRods();
+VertexConnectorScrewHoles(rounding=rounding, secure=secure, pent_h=pent_h);
 }
 }
+
 }
 
 //VertexStructure();
@@ -240,7 +336,7 @@ module Sector(radius, angles, fn = 24) {
 
 module PlatformSection(radius, angles, fn)
 {
-    linear_extrude(12)
+    linear_extrude(30)
     Sector(radius, angles, fn);
 }
 
@@ -251,37 +347,24 @@ module PiSections(slices)
     if (slices[0])
     {
         color([0.5, 0.0, 1.0, 0.5])
-        PlatformSection(12, [30, 150], 24);
+        PlatformSection(100, [30, 150], 24);
     }
     if (slices[1])
     {
         color([1.0, 0.5, 1.0, 0.5])
-        PlatformSection(12, [150, 270], 24);
+        PlatformSection(100, [150, 270], 24);
     }
     if (slices[2])
     {
         color([1.0, 0.0, 0.0, 0.5])
-        PlatformSection(12, [30, -90], 24);
+        PlatformSection(100, [30, -90], 24);
     }
     }
 }
 
-// module VertexNotch(sections=[1, 1, 1], vertex_variant=0)
-// {
-//     intersection()
-//     {
-//         PiSections(sections);
-//         if (vertex_variant == 1) // Default vertex structure
-//         {
-//             VertexStructure(height = 1.5, rounding = 0.2, truncate=vertex_tehtra_height_truncation, prism_radius = 0.0, vertex_cut=2.5, pent_h=pcorner_dist, secure=0);
-//         } else if (vertex_variant == 2)
-//         {
-//             IntegratedLift();
-//         }
-//     }
-// }
-
 $fn=12;
+//VertexStructure(height = 2.2, rounding = 0.2, truncate=vertex_tehtra_height_truncation*1.5, prism_radius = 4.2, pent_h=5.0, vertex_cut=1, secure=1);
+
 //VertexStructure(height = 2.2, rounding = 0.2, truncate=vertex_tehtra_height_truncation*1.5, prism_radius = 4.2, pent_h=5.0, vertex_cut=1, secure=1);
 
 // rotate([0, 0, 30]) import("passthrough.stl");
@@ -297,3 +380,59 @@ $fn=12;
 //             cube([plat_w, plat_d, 10]);
 //     }
 // }
+
+//VertexConnector();
+// // VertexConnectorV2Top();
+// BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+//VertexStructure(height = 1.5, rounding = 0.2, truncate=vertex_tehtra_height_truncation, prism_radius = 0.0, vertex_cut=2.5, pent_h=pcorner_dist, secure=0);
+
+
+module VertexStructureTop()
+{
+scale(0.1)
+{
+tri_extend = 2.5;
+translate([0, 0, -tri_extend])
+linear_extrude(tri_extend +vertex_tehtra_height_truncation)
+{
+projection()
+{
+difference()
+{
+color([1, 1, 0, 0.2]) translate([0, 0, 5.28+18.5]) scale(10) VertexStructure();
+translate([0, 0, vertex_tehtra_height_truncation*10*2]) cube([100, 100, vertex_tehtra_height_truncation*10*2], center=true);
+}
+}
+}
+}
+}
+
+module VertexConnectorToTriangularPrism()
+{
+scale(10) rotate([0, 180, 0]) 
+{
+VertexStructure();
+
+union()
+{
+difference()
+{
+VertexStructureTop();
+
+rotate([-magic_angle*2, 0, 0])
+translate([0, 51.1, 0])
+cube(100, center=true);
+
+// This is the cube that cuts off the bottom part of the triangular prism
+// from the perspective of the ground flat plane
+rotate([-magic_angle*2, 0, 0])
+translate([0, 0, -7.2])
+cube(12, center=true);
+}
+}
+}
+}
+
+//VertexStructure();
+//VertexStructureTop();
+// VertexConnectorToTriangularPrism();

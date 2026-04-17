@@ -3,6 +3,9 @@ include <penta_connector.scad>
 
 include <dodecahedron_inner_volume.scad>
 
+//include <cradle_brace.scad>
+
+
 mothership_connectors = [
 [0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0],
@@ -48,18 +51,35 @@ for (i = [0 : len(pos)-1])
 {
 translate(pos[i]*inner_panel_edge_length) rotate(rots[i]) rotate([0, 0, standard_panel_rots [i]]) 
     {
-        if (face_groups [i] == 3)
+
+//        if (face_groups [i] == 3)
+//        {
+//            //PanelSubConnectorsCradle(z_rot=[120, 0, 0, 0, 0]);
+//        }
+        if (i == 4)
         {
-            //PanelSubConnectorsCradle();
-        } else if (i == 0)
+            // TODO: Consider boolean mask
+            // instead of pi-slicing every vertex connector...
+            // ie toggle 2 off to prevent duplicate rendering
+            PanelSubConnectorsCradle(z_rot=[90, 0, 0, 0, 0]);
+        }
+        else if (i == 9)
         {
-            PanelSubConnectorsNoseCone(array=[1, 1, 1, 1, 3]);
+            PanelSubConnectorsCradle(z_rot=[90+120, 0, 0, 0, 0]);
+        }
+        else if (i == 11)
+        {
+            PanelSubConnectorsCradle(z_rot=[90+120*2, 0, 0, 0, 0]);
+        }
+        else if (i == 0)
+        {
+            //PanelSubConnectorsNoseCone(array=[1, 1, 1, 1, 3]);
         } else if (i == 2)
         {
-            PanelSubConnectorsNoseCone(array=[1, 1, 1, 3, 1]);
+            //PanelSubConnectorsNoseCone(array=[1, 1, 1, 3, 1]);
         } else if (i == 8)
         {
-            PanelSubConnectorsNoseCone(array=[1, 3, 1, 1, 1]);
+            //PanelSubConnectorsNoseCone(array=[1, 3, 1, 1, 1]);
         }
         else
         {
@@ -140,7 +160,26 @@ translate([0, 0, -8]) cube([50, 50, 12], center=true);
 }
 }
 
-//PentaVolume();
+//PanelSubConnectors(full_connectors, notch_security[0]);
+
+scale(10)
+rotate([0, 180, 0])
+difference()
+{
+color([1, 0, 0, 1])
+translate([0, 0, -height_vertical-vertex_tehtra_height_truncation])
+rotate([0, 0, -90])
+{
+//BaseMountAttachment();
+translate([0, 0, -0.1])
+scale(0.1)
+rotate([0, 180, 0])
+CentralOmniballMountSupport();
+}
+
+PentaVolume();
+}
+
 //export_platform_connectors = false;
 //if (export_platform_connectors)
 //{

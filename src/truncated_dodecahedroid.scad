@@ -65,10 +65,3 @@ hull()
     }
 }
 }
-//
-//import("baby_platform.stl");
-//import("mother_platform_full.stl");
-//import("mother_platform_front.stl");
-
-//import("mothership_connectors.stl");
-//import ("escape_pod_connectors.stl");

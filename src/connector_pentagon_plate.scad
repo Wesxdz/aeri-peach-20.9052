@@ -83,31 +83,14 @@ module ConnectorPentagonPlate(radius, cell_size, wall_thickness, thickness, bord
     //place_connector_screws(top_radius, distances_from_corners, thickness, secure, secure_spacing);
   }
   
-module TrucatedPlate()
-//{
-difference()
+module DecagonCut(mult)
 {
-
-// ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff");
-union()
-{
-// ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff", secure=[1, 0, 0, 0, 0], distances_from_corners = [5.75, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[1.75, 0, 0, 0, 0]);
-ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff", secure=[1, 0, 0, 0, 0], distances_from_corners = [5.0, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[3.5, 0, 0, 0, 0]);
-
-}
-panel_cutout = panel_radius-4;
-difference() {
-cylinder(panel_height, panel_cutout, panel_cutout);
-//translate([12, 0, 0,])
-//cylinder(panel_height, 6, panel_cutout);
-translate([16, 0, 0,])
-cylinder(panel_height, 10, panel_cutout);
-}
-    for (i = [0:5])
+    for (i = [0:4])
     {
-        mult = (i == 0) ? 1.6 : 1.0;
+        
+        //mult = (i == 0) ? 1.6 : 1.0;
         rotate([0, 0, i*(360/5)])
-        translate([panel_radius*2-pentagon_point_truncation* mult, 0, 0]) 
+        translate([panel_radius*2-pentagon_point_truncation * mult[i], 0, 0]) 
         {
         hull()
         {
@@ -118,11 +101,126 @@ cylinder(panel_height, 10, panel_cutout);
         }
     }
 }
-//$fn=36*2;  
-module CradlePanel()
+
+
+module DecagonSupportCut(mult)
 {
-TrucatedPlate();
+    for (i = [0:4])
+    {
+        
+        //mult = (i == 0) ? 1.6 : 1.0;
+        rotate([0, 0, i*(360/5)])
+        translate([panel_radius*2-pentagon_point_truncation * mult[i], 0, 0]) 
+        {
+        hull()
+        {
+        $fn=36*2;
+        translate([0, 0, panel_thickness]) cylinder(panel_thickness, panel_radius/3, panel_radius/3);
+        }
+        }
+    }
 }
+ 
+// panel_cutout is the radius of the circular cutout from the panel center
+module TruncatedPlate(panel_cutout = panel_radius-4, distances_from_corners, secure_spacing, mult = [1.0, 1.0, 1.0, 1.0, 1.0])
+{
+    Z = panel_thickness/tan(116.565/2);
+    top_radius = panel_radius-Z;
+difference()
+{
+union()
+{
+// secure_spacing 3.5 is NOSE CONE SPACING
+ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff", secure=[1, 0, 0, 0, 0], distances_from_corners=distances_from_corners, secure_spacing=secure_spacing);
+
+difference()
+{
+for (i = [0:1])
+{
+    translate([0.0+i * 4, 0, 0])
+    rotate([0, 90-magic_angle, 0])
+    translate([0, 0, -2])
+    cylinder(panel_thickness*13, 0.6, 0.6, $fn=36);
+}
+
+translate([0, 0, -5])
+cube([20, 20, 10], center=true);
+
+}
+}
+union() {
+cylinder(panel_thickness, panel_cutout, panel_cutout);
+
+
+// Cradle variant
+// Cutout holonomic mount holes
+for (i = [0:1])
+{
+    translate([0.0+i * 4, 0, 0])
+    rotate([0, 90-magic_angle, 0])
+    translate([0, 0, -2])
+    cylinder(panel_thickness*14, 0.4, 0.4, $fn=36);
+}
+//translate([12, 0, 0,])
+//cylinder(panel_height, 6, panel_cutout);
+
+// Nose Cone variant
+//translate([16, 0, 0,])
+//cylinder(panel_height, 10, panel_cutout);
+    DecagonCut(mult);
+}
+}
+}
+//$fn=36*2;  
+module NeoCradlePanel()
+{
+TruncatedPlate(0.0, distances_from_corners = [5.75, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[1.75, 0, 0, 0, 0]);
+}
+
+module NeoNoseConePanel()
+{
+TruncatedPlate(0.0, distances_from_corners = [6, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[3.5, 0, 0, 0, 0], mult = [1.6, 1, 1, 1, 1]);
+}
+
+
+//TruncatedPlate();
+panel_cutout = panel_radius-4;
+
+//$fn=36*4;
+//projection(cut=true)
+//color([0, 1, 1, 0.9]) cylinder(panel_thickness, panel_cutout, panel_cutout);
+
+module PolycarbonateSupportPanel()
+{
+$fn=36*2;
+difference()
+{
+TruncatedPlate(0.0, distances_from_corners = [pcorner_dist, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[0, 0, 0, 0, 0]);
+cylinder(panel_thickness, panel_cutout+0.08, panel_cutout+0.09); // 1.8 mm pad snug
+}
+difference()
+{
+translate([0, 0, panel_thickness])
+difference()
+{
+cylinder(panel_thickness, panel_cutout+0.7, panel_cutout+0.5);
+cylinder(panel_thickness, panel_cutout-0.5, panel_cutout-0.5);
+}
+DecagonSupportCut([9.0, 9.0, 9.0, 9.0, 9.0]);
+}
+}
+
+//scale(10) PolycarbonateSupportPanel();
+
+
+//DecagonSupportCut([2.4, 1.0, 1.0, 1.0, 1.0]);
+// Inkscape is a better bet for exporting to DXF 
+// for SendCutSend, but use mm
+
+
+
+//translate([0, 0, 1]) scale(0.1) import("neo_cradle_panel.stl");
+//NeoCradlePanel();
 //ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff");
 //ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, true, color([0, 1, 1, 1]), [3, 3, 6, 3, 3], [4, 4, 19, 4, 4], [0, 0, 1, 0, 0], [0, 0, power_secure_spacing, 0, 0]);
 //ConnectorPentagonPlateScrews(panel_radius, 0.3, 0.1, panel_thickness, border_edge, false, color([0, 1, 1, 1]));

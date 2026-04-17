@@ -11,7 +11,7 @@ include <nutsnbolts/cyl_head_bolt.scad>;
 
 //$fn=16;
 //$fn=32;
-$fn=64;
+$fn=64*8;
 // Production hemisphere
 //$fn=16;
 
@@ -62,6 +62,13 @@ barrel_slot_offset = (barrel_wheel_radius+wheel_to_center_padding)*2;
 // 40
 // barrel_wheel_slot_edge = -cuboid_offset - cuboid_fixed_cut/2;
 barrel_wheel_slot_edge = hex_standoff_length/2;
+
+// 1mm can sometimes be too small and TPU compression at the edges of the wheel
+// cause the hemisphere to collide with the connector
+// This may be less of an issue if TPU is printed above a harder material in a multi material system
+
+// Keep this value under 6 or there will not be a spacer betwen the bearings!
+hemisphere_connector_spacer_height = 2;
 
 
 //barrel_wheel_slot_edge = 40; // wheel_radius - (barrel_wheel_radius+wheel_to_center_padding);
@@ -119,12 +126,12 @@ module SemisphereRing()
             cube([wheel_radius*2, wheel_radius*2, wheel_radius*2]);
             
             // Remove the pole part of the hemisphere
-            mirror([1, 0, 0]) translate([axis_connection_thickness+1.0, -wheel_radius, -wheel_radius])
+            mirror([1, 0, 0]) translate([axis_connection_thickness+hemisphere_connector_spacer_height, -wheel_radius, -wheel_radius])
             cube([wheel_radius*2, wheel_radius*2, wheel_radius*2]);
             
             // Remove the region which overlaps the axis connectors
             // large 6mm spacing region just in case
-            rotate([0, -90, 0]) cylinder(h=10, r=inner_radius+6);
+            rotate([0, -90, 0]) cylinder(h=10+hemisphere_connector_spacer_height, r=inner_radius+6);
         }
     }
 }
@@ -137,8 +144,8 @@ module HemisphereSection()
         wheel_padding = 1.0;
         union()
         {
-        rotate([0, -90, 0]) cylinder(h=axis_connection_thickness+1, r1=wheel_radius, r2=wheel_radius); // cut out the whole first mm
-        translate([-axis_connection_thickness-1, 0, 0]) rotate([0, -90, 0]) cylinder(h=7, r1=bearing_cutout, r2=bearing_cutout);
+        rotate([0, -90, 0]) cylinder(h=axis_connection_thickness+hemisphere_connector_spacer_height, r1=wheel_radius, r2=wheel_radius); // cut out the whole first mm
+        translate([-axis_connection_thickness-hemisphere_connector_spacer_height, 0, 0]) rotate([0, -90, 0]) cylinder(h=7, r1=bearing_cutout, r2=bearing_cutout);
         // Place the bearings in from either side
         steel_ring_height = 1.0;
         translate([-axis_connection_thickness-1-7, 0, 0]) rotate([0, -90, 0]) cylinder(h=wheel_radius, r1=bearing_cutout-steel_ring_height, r2=bearing_cutout-steel_ring_height);
@@ -225,12 +232,8 @@ module HemisphereConnector(show_hemisphere_connector_section=true, show_barrel_r
         {
         rotate([0, -90, 0]) cylinder(axis_connection_thickness , inner_radius , inner_radius);
         // Bearing spacer
-        // TODO: Spacer height 1 is an exact sphere: the TPU wheel needs to be shrunk by 1mm if spacer height is 2! 
-        spacer_height = 2;
-        // Keep in mind that the hemisphere 608 has to be adjusted if this is changed
-        // to maintain a perfect sphere shape
-        translate([-axis_connection_thickness -spacer_height, 0, 0])    
-        rotate([0, 90, 0]) cylinder(spacer_height, 22/2, 22/2);
+        translate([-axis_connection_thickness -hemisphere_connector_spacer_height, 0, 0])    
+        rotate([0, 90, 0]) cylinder(hemisphere_connector_spacer_height, 22/2, 22/2);
         }
         }
         //  hole
@@ -594,10 +597,12 @@ module DowelPinInstallationSlit()
 }
 
 
-//rotate([0, 90, 0]) SemiWrap();
+rotate([0, 90, 0]) SemiWrap();
+rotate([180, -90, 0]) SemiWrap();
 
-//CrossSection();
-//SemiWrap();
+// CrossSection();
+//rotate([0, 90, 0]) SemiWrap();
+//SemisphereRing();
 // BarrelWheelSupportRod();
 //HemisphereConnector();
 //DowelPinInstallationSlit();
@@ -614,8 +619,8 @@ module DowelPinInstallationSlit()
 
 
 //LeftHemisphereConnector();
-rotate([0, 180, 0]) RightHemisphereConnector();
+//rotate([0, 180, 0]) RightHemisphereConnector();
 
-//ActiveRods();
+ActiveRods();
 
 //ConnectorCutout();

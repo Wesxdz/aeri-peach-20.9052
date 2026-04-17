@@ -1,9 +1,11 @@
-// Depreciated in favor of vertex_structure.scad
+// DEPRECIATED in favor of vertex_structure.scad
 
 // Brass insert
 include <atx_compliance.scad>
 include <nutsnbolts/cyl_head_bolt.scad>
 include <dodecahedroid_config.scad>
+
+
 
 // Constants
 C0 = 0.809016994374947424102293417183;
@@ -76,6 +78,7 @@ for (f = [0 : 0]) {
 }
 }
 
+// // DEPRECIATED
 module VertexConnector(secure=0, vertex_cutoff = 0.0, show_screw_holes = true, show_screws=false, power_variant=false, dodeca_cut = 2.88386, lower_dodeca=0.0)
 {
 
@@ -431,8 +434,64 @@ scale(10) VertexConnectorScrewHoles();
 }
 }
 }
-//VertexConnectorScrewHoles();
-//scale(10) rotate([0, 180, 0]) VertexConnectorV2();
+
+
+module VertexConnectorV2Top()
+{
+
+tri_extend = 2.5;
+translate([0, 0, -tri_extend])
+linear_extrude(tri_extend +vertex_tehtra_height_truncation)
+{
+projection()
+{
+scale(0.1)
+rotate([0, 0, 0])
+difference()
+{
+color([1, 1, 0, 0.2]) translate([0, 0, 5.28+18.5]) scale(10) BeveledVertexConnector(bevel_radius = 0.3, $fn = 2*36);
+translate([0, 0, vertex_tehtra_height_truncation*10*2]) cube([100, 100, vertex_tehtra_height_truncation*10*2], center=true);
+}
+}
+}
+}
+
+
+module VertexConnectorToTriangularPrism()
+{
+scale(10) rotate([0, 180, 0]) 
+{
+VertexConnectorV2();
+
+union()
+{
+difference()
+{
+VertexConnectorV2Top();
+
+rotate([-magic_angle*2, 0, 0])
+translate([0, 51.1, 0])
+cube(100, center=true);
+
+// This is the cube that cuts off the bottom part of the triangular prism
+// from the perspective of the ground flat plane
+rotate([-magic_angle*2, 0, 0])
+translate([0, 0, -7.2])
+cube(12, center=true);
+}
+}
+}
+}
+
+
+
+//translate([80, -10, 0])
+//sphere(60);
+//translate([0, 0, -200])
+//MountingInterface();
+
+//MountingInterface();
+
 //VertexConnector(power_variant=true);
 
 // Power Variant Beveled Vertex Connector
@@ -450,7 +509,7 @@ module BeveledPowerVertexConnector(bevel_radius = 0.3) {
                 dodeca_cut = 2.88386 + 0.5, 
                 lower_dodeca = 0.0
             );
-            $fn = 24; // Keep fn lower for minkowski to avoid long render times
+            $fn = 4; // Keep fn lower for minkowski to avoid long render times
             sphere(r = bevel_radius);
         }
 
@@ -460,7 +519,7 @@ module BeveledPowerVertexConnector(bevel_radius = 0.3) {
 
         // 3. POWER PASSTHROUGH
         // Re-cutting the center hull to ensure the minkowski didn't "fill" it
-        $fn = 64;
+        $fn = 12;
         hull() {
             for (i = [0:2]) {
                 rotate([0, 0, 60 + i * 120]) 
@@ -476,9 +535,6 @@ module BeveledPowerVertexConnector(bevel_radius = 0.3) {
             cube([50, 50, 10], center = true);
     }
 }
-
-// Global resolution for holes
-$fn = 8;
 
 //VertexConnectorScrewHoles(power_variant = false, secure = 0);
 // Render

@@ -55,6 +55,7 @@ panel_rots = [36-72, -36*4.5, 72*3, 18, 180, -18, 18, -18, 18+72, 18+36, 18, 0];
 // 2 is Life Support
 // 3 is Cradle
 face_groups = [0, 1, 0, 1, 3, 2, 2, 2, 0, 3, 1, 3];
+            // 0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
 // Face group palettes
 pastel_gothic = ["#DB9366", "#FFBAEC", "#ADEAE6", "#93DB65"];
@@ -83,11 +84,10 @@ dihedral = 116.565;
 // Circumradius of pentagon
 // ATX
 //panel_radius = 16;
-// ITX
-//panel_radius=14;
 
 panel_radius = 14;
 // In order to fit on a 250mm plate the max radius is 12.5 cm!
+// However if we truncate it we can fit 14cm!
 //panel_radius = 12.5;
 
 dodecahedron_radius = 1/.688 * panel_radius;
