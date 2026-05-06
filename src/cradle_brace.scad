@@ -69,12 +69,17 @@ module OmniballBrace()
     }
 }
 
-module VertexConnectorBrace()
+module VertexConnectorBrace(print_layout=true)
 {
-VertexMegichiMount();
+bearing_cutout = 11;
 
-rotate([magic_angle*2, 0, 0])
-rotate([0, 90, 180])
+if (!print_layout)
+{
+    VertexMegichiMount();
+}
+
+rotate([print_layout ? 0 : magic_angle*2, 0, 0])
+rotate([0, print_layout ? 0 : 90, 180])
 union()
 {
 difference()
@@ -82,17 +87,38 @@ difference()
 rotate([0, 90, 0])
 OmniballBrace();
 
-translate([85, 0, 0])
-rotate([-90, 0, 0])
-cylinder(100, 4.05, 4.05, $fn=36);
+// TODO: Cutout 608 volume HERE
+
+    union()
+    {
+    translate([85, 0, 0])
+    rotate([-90, 0, 0])
+    cylinder(100, 4.2, 4.2, $fn=36); // The M8 rod should passthrough frictionless
+//    cylinder(100, 4.05, 4.05, $fn=36);
+
+    translate([85, 60, 0])
+    rotate([-90, 0, 0])
+    cylinder(h=7, r1=bearing_cutout, r2=bearing_cutout);
+    }
 }
-translate([85, -142, 0])
-rotate([-90, 0, 0])
-cylinder(210, 4.05, 4.05, $fn=36);
+
+if (!print_layout)
+{
+    translate([85, -142, 0])
+    rotate([-90, 0, 0])
+    cylinder(210, 4.2, 4.2, $fn=36);
+
+    // -116 is just approximate, it's pretty hard to calculate this value from the trig involved in the vertex junction
+    // but should be eventually figured out!
+    translate([85, -105, 0])
+    rotate([-90, 0, 0])
+    cylinder(h=7, r1=bearing_cutout, r2=bearing_cutout, $fn=36);
+}
+
 }
 }
 
 //translate([100, 0, 0]) 
 //scale(10) VertexConnector();
 //
-//VertexConnectorBrace();
+//VertexConnectorBrace(true);

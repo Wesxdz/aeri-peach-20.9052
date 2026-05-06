@@ -1,8 +1,6 @@
 include <dodecahedroid_config.scad>
 include <nutsnbolts/cyl_head_bolt.scad>
 
-
-
 // Constants
 C0 = 0.809016994374947424102293417183;
 C1 = 1.30901699437494742410229341718;
@@ -311,6 +309,11 @@ VertexConnectorScrewHoles(rounding=rounding, secure=secure, pent_h=pent_h);
 }
 }
 
+}
+
+module VertexStructureVolume(height = 1.5, rounding = 0.2, truncate=vertex_tehtra_height_truncation, prism_radius = 0.0, vertex_cut=2.5, pent_h=pcorner_dist, secure=0)
+{
+VertexConnector(height, rounding, truncate, prism_radius, vertex_cut);
 }
 
 //VertexStructure();

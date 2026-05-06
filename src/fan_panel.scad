@@ -2,8 +2,6 @@ include <dodecahedroid_config.scad>
 include <pentagon_plate.scad>
 include <connector_pentagon_plate.scad>
 
-include <ergonomic_handle_v5.scad>
-
 module Fan(size = 14.0, mount_offset = 0.15)
 {   
 

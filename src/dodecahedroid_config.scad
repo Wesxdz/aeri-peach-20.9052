@@ -48,7 +48,7 @@ rots = [
 // These rotations align the panel edges
 //panel_rots = [36, -36*4.5, 0, 18 - 72*2, 180+36, -18, 18, -18, 18+72, 18+72, 18, -36];
 
-panel_rots = [36-72, -36*4.5, 72*3, 18, 180, -18, 18, -18, 18+72, 18+36, 18, 0];
+panel_rots = [36-72, -36*4.5, 72*3, 18, 36, -18, 18, -18, 18+72, 270, 18, 180-36];
 
 // 0 is Nose Cone
 // 1 is Bridge
@@ -188,7 +188,7 @@ brass_insert_radius = 4.8/2/10;
 brass_insert_height = 4/10;
 
 screw_clearance = 0.03;
-m3_rad = 0.15+screw_clearance;
+m3_rad = 0.15+0.03;
 
 mounted_wheel_depth = 0.8;
 

@@ -1,6 +1,8 @@
 include <render_config.scad>
 include <dodecahedroid_config.scad>
 
+// The basic pentagon form for panels
+
 module Pentagon(size) {
 angle = 360 / 5;
 points = [

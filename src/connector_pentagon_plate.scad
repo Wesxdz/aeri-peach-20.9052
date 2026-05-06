@@ -133,48 +133,17 @@ union()
 // secure_spacing 3.5 is NOSE CONE SPACING
 ConnectorPentagonPlate(panel_radius, cell_size, wall_thickness, panel_thickness, border_edge, false, "#ffffff", secure=[1, 0, 0, 0, 0], distances_from_corners=distances_from_corners, secure_spacing=secure_spacing);
 
-difference()
-{
-for (i = [0:1])
-{
-    translate([0.0+i * 4, 0, 0])
-    rotate([0, 90-magic_angle, 0])
-    translate([0, 0, -2])
-    cylinder(panel_thickness*13, 0.6, 0.6, $fn=36);
-}
-
-translate([0, 0, -5])
-cube([20, 20, 10], center=true);
-
-}
 }
 union() {
-cylinder(panel_thickness, panel_cutout, panel_cutout);
-
-
-// Cradle variant
-// Cutout holonomic mount holes
-for (i = [0:1])
-{
-    translate([0.0+i * 4, 0, 0])
-    rotate([0, 90-magic_angle, 0])
-    translate([0, 0, -2])
-    cylinder(panel_thickness*14, 0.4, 0.4, $fn=36);
-}
 //translate([12, 0, 0,])
 //cylinder(panel_height, 6, panel_cutout);
 
 // Nose Cone variant
 //translate([16, 0, 0,])
 //cylinder(panel_height, 10, panel_cutout);
-    DecagonCut(mult);
+ DecagonCut(mult);
 }
 }
-}
-//$fn=36*2;  
-module NeoCradlePanel()
-{
-TruncatedPlate(0.0, distances_from_corners = [5.75, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[1.75, 0, 0, 0, 0]);
 }
 
 module NeoNoseConePanel()
@@ -182,6 +151,10 @@ module NeoNoseConePanel()
 TruncatedPlate(0.0, distances_from_corners = [6, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[3.5, 0, 0, 0, 0], mult = [1.6, 1, 1, 1, 1]);
 }
 
+module NeoCradlePanel()
+{
+TruncatedPlate(0.0, distances_from_corners = [6, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[1.75, 0, 0, 0, 0], mult = [1.6, 1, 1, 1, 1]);
+}
 
 //TruncatedPlate();
 panel_cutout = panel_radius-4;
@@ -210,7 +183,51 @@ DecagonSupportCut([9.0, 9.0, 9.0, 9.0, 9.0]);
 }
 }
 
+// A reusable module for slanted support chunks
+module trapezoid_chunk(base_width, top_width, height, thickness) {
+    hull() {
+        // Bottom face
+        translate([0, -base_width/2, 0])
+        cube([thickness, base_width, 0.01]);
+
+        // Top face
+        translate([0, -top_width/2, height])
+        cube([thickness, top_width, 0.01]);
+    }
+}
+
+module UpperDINSupportChunk()
+{
+    // Local constants for easier adjustment
+    base_w = 4;
+    base_t_w = base_w+1;
+    top_w = 9;
+    thickness = 2.5;
+    base_cube_height = 0.8
+    ;
+    trap_height = 2.81;
+
+    // Position the whole assembly
+    translate([-panel_radius + pcorner_dist, 0, panel_thickness * 2]) 
+    {
+        // 1. The Cube "Base" (matches the narrow bottom of the trapezoid)
+        // translate([0, -base_w/2, 0])
+        // cube([thickness, base_w, base_cube_height]);
+
+        // 2. The Trapezoid Part (flaring out from 5 to 10)
+        translate([0, 0, base_cube_height])
+        trapezoid_chunk(base_t_w, top_w, trap_height, thickness);
+    }
+}
+
+//PolycarbonateSupportPanel();
+//UpperDINSupportChunk();
+
+
+
+//TruncatedPlate(0.0, distances_from_corners = [pcorner_dist, pcorner_dist, pcorner_dist, pcorner_dist , pcorner_dist], secure_spacing=[0, 0, 0, 0, 0]);
 //scale(10) PolycarbonateSupportPanel();
+//NeoCradlePanel();
 
 
 //DecagonSupportCut([2.4, 1.0, 1.0, 1.0, 1.0]);

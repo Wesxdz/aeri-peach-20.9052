@@ -1,4 +1,3 @@
-//include <vertex_connector.scad>
 include <telescoping_lift.scad>
 include <vertex_structure.scad>
 
@@ -19,26 +18,6 @@ translate([-28+10, 0, segment_len/2]) TelescopingLift();
 
 
 //TelescopingLift();
-
-//scale(10) translate([0, 0, dodecahedron_radius+vertex_tehtra_height_truncation]) rotate([0, 0, 90]) import("truncated_dodecahedroid.stl");
-//rotate([0, 0, -90]) translate([0, 0, 0]) LiftMount();
-//RailEndcapAnchor();
-//Stage_1();\
-
-//difference()
-//{
-//scale(10) translate([0, 0, -vertex_tehtra_height_truncation]) rotate([0, 0, 30-180]) VertexConnectorRounded(height = (segment_len + MGN12[5])/10, rounding = 0.5, truncate=vertex_tehtra_height_truncation, prism_radius = 0);
-//translate([-28+10, 0, segment_len/2]) StageOneVertexAnchor();
-//}
-//translate([-28+10, 0, segment_len/2]) TelescopingLift();
-//Stage1RopeAnchor();
-
-
-//difference()
-//{
-//scale(10) translate([0, 0, -vertex_tehtra_height_truncation]) rotate([0, 0, 30-180]) VertexConnectorRounded(height = (segment_len + MGN12[5])/10, rounding = 0.5, truncate=vertex_tehtra_height_truncation, prism_radius = 0);
-//translate([-28+10, 0, segment_len/2]) StageOneVertexAnchor();
-//}
 
 mount_height = 8;
 car_to_rail_top = (-MGN12H_carriage[4]+mount_height+8);
@@ -126,31 +105,10 @@ translate([-28+10, 0, segment_len/2]) TelescopingLift();
 }
 }
 
-
-
-//TelescopingLift();
-
-//scale(10) translate([0, 0, dodecahedron_radius+vertex_tehtra_height_truncation]) rotate([0, 0, 90]) import("truncated_dodecahedroid.stl");
-//rotate([0, 0, -90]) translate([0, 0, 0]) LiftMount();
-//RailEndcapAnchor();
-//Stage_1();\
-
-//difference()
-//{
-//scale(10) translate([0, 0, -vertex_tehtra_height_truncation]) rotate([0, 0, 30-180]) VertexConnectorRounded(height = (segment_len + MGN12[5])/10, rounding = 0.5, truncate=vertex_tehtra_height_truncation, prism_radius = 0);
-//translate([-28+10, 0, segment_len/2]) StageOneVertexAnchor();
-//}
-//translate([-28+10, 0, segment_len/2]) TelescopingLift();
-//Stage1RopeAnchor();
-
-
-//difference()
-//{
-//scale(10) translate([0, 0, -vertex_tehtra_height_truncation]) rotate([0, 0, 30-180]) VertexConnectorRounded(height = (segment_len + MGN12[5])/10, rounding = 0.5, truncate=vertex_tehtra_height_truncation, prism_radius = 0);
-//translate([-28+10, 0, segment_len/2]) StageOneVertexAnchor();
-//}
-
+// attachment_height = 8.0;
 attachment_height = 8.0; // TODO: Increase to 16
+neo_hook = 16;
+// attachment_rad = 16+4;
 attachment_rad = 16;
 module BaseMountAttachment()
 {
@@ -162,15 +120,15 @@ difference()
 {
 // Original attachment height was 8 but this was too small!
 
-translate([0, 0, -attachment_height])
-cylinder(attachment_height, attachment_rad, attachment_rad, $fn=36*3);
+translate([0, 0, -neo_hook])
+cylinder(neo_hook, attachment_rad, attachment_rad, $fn=36*3);
 
     union()
     {
-    for (i = [0:3])
+    for (i = [0:2])
     {
-    translate([0, 0, -attachment_height+2.5+1])
-    rotate([0, 0, 30+120*i])
+    translate([0, 0, -neo_hook+2.5+1])
+    rotate([0, 0, 120*i-30])
     rotate([90, 0, 0])
     translate([0, 0, attachment_rad-4])
     //translate([attachment_rad, 0, 0])
@@ -178,7 +136,7 @@ cylinder(attachment_height, attachment_rad, attachment_rad, $fn=36*3);
     {
     scale(10) BrassInsert();
     translate([0, 0, -6])
-    cylinder(10, m3_rad, m3_rad);
+    cylinder(10, m3_rad*10, m3_rad*10, $fn=36);
     }
     }
 }
@@ -187,33 +145,7 @@ cylinder(attachment_height, attachment_rad, attachment_rad, $fn=36*3);
 }
 }
 
-
-
-
-//VertexStructure(secure=1);
-//rotate([0, 180, 0])
-//BaseMountAttachment();
-
-module rounded_equilateral_triangle(side, radius) {
-    // Standard height math
-    h = side * sqrt(3) / 2;
-    
-    // To keep the 'side' length accurate, we move the centers
-    // of the circles inward based on the radius.
-    // However, for simple rounding, we can just hull circles:
-    hull() {
-        translate([-side/2, -h/3, 0]) circle(r=radius); // Bottom Left
-        translate([side/2, -h/3, 0])  circle(r=radius); // Bottom Right
-        translate([0, 2*h/3, 0])      circle(r=radius); // Top Apex
-    }
-}
-
-module rounded_hexagon(side, radius) {
-    // A regular hexagon's vertices are located at:
-    // x = side * cos(angle)
-    // y = side * sin(angle)
-    // where angle = 0, 60, 120, 180, 240, 300 degrees.
-    
+module rounded_hexagon(side, radius) {    
     hull() {
         for (i = [0 : 5]) {
             angle = i * 60;
@@ -224,39 +156,92 @@ module rounded_hexagon(side, radius) {
 }
 
 
-module CentralOmniballMountSupport()
+module CentralOmniballMountSupport(bearing_z=0)
 {
 taper_angle = 2;
 delta_r = attachment_height * tan(taper_angle);
 enter_rad = attachment_rad + delta_r;
 
 $fn = 50;
-support_mount_height = 41;
-color([1, 0, 0, 1])
+support_mount_height = 46;
+
+difference() {
+    
 rotate([0, 0, -30])
 difference()
 {
-difference()
-{
-linear_extrude(support_mount_height)
-rounded_hexagon(side=enter_rad*2, radius=enter_rad);
 
-cylinder(h=attachment_height, 
-         r1=enter_rad, 
-         r2=attachment_rad, 
+union()
+{
+    
+    difference() {
+        
+    linear_extrude(support_mount_height)
+    rounded_hexagon(side=enter_rad*2, radius=enter_rad);
+    
+    translate([0, 0, attachment_height])
+    linear_extrude(support_mount_height)
+    rounded_hexagon(side=enter_rad*2-8, radius=enter_rad-2);
+
+    }
+
+// wall for attaching to vertex connector/lift mount
+cylinder(h=attachment_height+8, 
+         r1=enter_rad+4, 
+         r2=attachment_rad+4, 
          $fn=72);
 
-
 }
 
-translate([0, 0, attachment_height])
-linear_extrude(support_mount_height)
-rounded_hexagon(side=enter_rad*2-8, radius=enter_rad-2);
-}
-}
 
-//rotate([0, 180, 0])
+    union()
+    {
+        cylinder(h=attachment_height+8, 
+                r1=enter_rad, 
+                r2=attachment_rad, 
+                $fn=72);
+
+        }
+
+        // 608 bearing cutouts
+        // for (i = [0:2])
+        // {
+        //     bearing_cutout = 11;
+        //     rotate([0, 0, 120*i+60])
+        //     translate([0, enter_rad*2+5, bearing_cutout+bearing_z])
+        //     rotate([-90, 0, 0])
+        //     color([0, 0, 1, 1])
+        //     cylinder(h=7, r1=bearing_cutout, r2=bearing_cutout);
+        // }
+
+        for (i = [0:2])
+        {
+            bearing_cutout = 11.05;
+            rotate([0, 0, 120*i])
+            translate([0, enter_rad*2, bearing_cutout+attachment_height])
+            rotate([-90, 0, 0])
+            cylinder(h=20, r1=bearing_cutout, r2=bearing_cutout);
+        }
+
+        for (i = [0:2])
+        {
+            rotate([0, 0, 120*i])
+            translate([0, 0, m3_rad*10+attachment_height+1])
+            rotate([-90, 0, 0])
+            cylinder(h=100, r1=m3_rad*10, r2=m3_rad*10);
+        }
+
+    }
+
+}
+}
+//translate([0, 0, -0.1]) rotate([0, 180, 0]) scale(0.1) CentralOmniballMountSupport();
+
 //CentralOmniballMountSupport();
+//rotate([0, 180, 0])
+//scale(10)
+//BaseMountAttachment();
+
 
 //Stage1RopeAnchor();
 //IntegratedLift();
@@ -266,6 +251,9 @@ rounded_hexagon(side=enter_rad*2-8, radius=enter_rad-2);
 //VertexStructure(height = 1.5, rounding = 0.1, truncate=vertex_tehtra_height_truncation*2, prism_radius = 3.5, pent_h=5.75);
 //Stage1RopeAnchor();
 //IntegratedLift();
+//scale(10) BaseMountAttachment();
+//rotate([0, 180, 0])
+//CentralOmniballMountSupport();
 
 //scale(10) translate([0, 0, -vertex_tehtra_height_truncation]) rotate([0, 0, 0]) 
 //VertexStructure(height = 1.5, rounding = 0.1, truncate=vertex_tehtra_height_truncation*2, prism_radius = 3.5, pent_h=5.75);

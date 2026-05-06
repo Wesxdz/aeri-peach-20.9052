@@ -160,7 +160,8 @@ difference()
 
     mount_points = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]];
     for (i = [0:len(mount_points)-1])
-    {
+    {   
+        // Show screws
         //translate([0, 0, -0.4]) translate(mount_points[i]*ims_d) rotate([0, 180, 0]) scale(0.1) screw("M2x8");
         // cylinder(0.8, 0.1, 0.1);
     }
@@ -174,7 +175,7 @@ ELP_TopMount();
 difference()
 {
 ELP_BottomMount();
-rotate([0, 180, 0]) translate([-shift_up, 0, -0.1]) Camera(0.95);
+rotate([0, 180, 0]) translate([0, 0, -0.1]) Camera(0.95);
 }
 }
 }

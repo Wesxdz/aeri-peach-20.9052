@@ -1,4 +1,4 @@
-// Giant Peach 20.9052
+// Aeri Peach 20.9052
 include <dodecahedroid_config.scad>
 
 include <pentagon_plate.scad>
@@ -53,7 +53,7 @@ for (i = [0 : len(pos)-1]) {
     translate(pos[i]*panel_edge_length) rotate(rots[i]) rotate([0, 0, panel_rots[i]])
     CradlePanel();
     }
-    if (false)
+    if (true)
     //if(face_groups[i] == 3)
     {
     translate(pos[i]*panel_edge_length) rotate(rots[i]) rotate([0, 0, panel_rots[i]])
